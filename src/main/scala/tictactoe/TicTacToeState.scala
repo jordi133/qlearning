@@ -6,50 +6,35 @@ package tictactoe
 
 object TicTacToeState {
   val stateSize = 9
-
   val emptyState = 0
-  val emptyBoard = Vector.fill[Char](stateSize)(noTokenChar)
 
-  def newWithStartingPlayer(player: Player) = TicTacToeState(emptyState + (player << (2 * stateSize)))
+  def newState(startingPlayer: Player) = TicTacToeState(emptyState + (startingPlayer << (2 * stateSize)))
 
-  val tokenval = Map(p0TokenChar -> 1, p1TokenChar -> 2, noTokenChar -> 0)
+  implicit class ImplicitState(state: Either[Player, TicTacToeState]) {
+    def move(index: Int): Either[Player, TicTacToeState] = state.flatMap(_.move(index))
 
-  def stateFromInt(state: Int): TicTacToeState = {
-    var result = emptyBoard
-    for (i <- result.indices) {
-
-      (state >> (2 * i)) & 3 match {
-        case 0 => result = result.updated(i, noTokenChar)
-        case 1 => result = result.updated(i, p0TokenChar)
-        case 2 => result = result.updated(i, p1TokenChar)
-      }
+    def asString: String = state match {
+      case Left(winner) => s"Game won by $winner"
+      case Right(st) => st.toString
     }
-    TicTacToeState(state)
   }
 
-  // Legacy
-  def stateAsInt(state: Vector[Char], currentPlayer: Int = 0) = {
-    var result: Int = 0
-    for (i <- 0 until stateSize) {
-      val v = tokenval(state(i)) << (2 * i)
-      result += v
-    }
-    result = result + (currentPlayer << (2 * stateSize))
-    result
-  }
-
-  
 }
 
+/**
+  * @param state The state of the game. Counting from the rightmost bit, the first two bits correspond
+  *              to the topleft field, containing 00 for '-', 01 for 'O' and 10 for 'X'. The next two
+  *              correspond to the middle field of the top row, and so on. The 18th bit form the right
+  *              contains the next player
+  */
 case class TicTacToeState private[tictactoe](state: Int) extends AnyVal {
 
   def tokenAt(i: Int): Token =
     (state >> (2 * i)) & 3
 
-  def currentPlayer: Player = state >> (2 * TicTacToeState.stateSize)
+  def currentPlayer: Player = (state >> (2 * TicTacToeState.stateSize)) & 1
 
   def updateTokenAt(index: Int): Int = state + (playerTokens(currentPlayer) << (2 * index))
-
 
   /**
     * Returns either Left(winning player) or Right(resulting board after move)
@@ -63,10 +48,16 @@ case class TicTacToeState private[tictactoe](state: Int) extends AnyVal {
 
     if (isWonByMove(index)) {
       Left(currentPlayer)
+    } else if (getPossibleMoves.size == 1) {
+      Left(pDraw)
     } else {
-      val nextPlayer = 1 - currentPlayer
-      val newIntState = updateTokenAt(index) + (nextPlayer << (2 * TicTacToeState.stateSize))
-      Right(TicTacToeState.stateFromInt(newIntState))
+      // Update token and flip bit representing next player
+      val newIntState = updateTokenAt(index) ^ (1 << (2 * TicTacToeState.stateSize))
+
+      // If only 1 token is on the board, normalize state by rotating TODO
+      // If 2 tokens on the board, normalize by mirroring  TODO
+
+      Right(TicTacToeState(newIntState))
     }
   }
 
@@ -109,12 +100,11 @@ case class TicTacToeState private[tictactoe](state: Int) extends AnyVal {
 
   def getPossibleMoves: IndexedSeq[Int] = (0 until TicTacToeState.stateSize).filter(tokenAt(_) == noToken)
 
-
   def toCharArray: IndexedSeq[Char] = for (i <- 0 until TicTacToeState.stateSize) yield tokenToChar(tokenAt(i))
 
   override def toString: String = {
     StringBuilder.newBuilder
-    .append(tokenToChar(currentPlayer)).append(" to move next\n")
+      .append(tokenToChar(playerTokens(currentPlayer))).append(" to move next\n")
       .append(toCharArray.grouped(3).mkString("\n"))
       .toString()
   }

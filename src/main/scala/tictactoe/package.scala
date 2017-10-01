@@ -9,14 +9,17 @@ package object tictactoe {
 
   type Token = Int
 
-  val players = List(0, 1)
+  val pDraw = -1
+  val p0 = 0
+  val p1 = 1
+  val players = List(p0, p1)
   val p0Token = 1
   val p1Token = 2
   val noToken = 0
   val p0TokenChar = 'O'
   val p1TokenChar = 'X'
   val noTokenChar = '-'
-  val playerTokens = Map(0 -> p0Token, 1 -> p1Token)
+  val playerTokens = Map(p0 -> p0Token, p1 -> p1Token)
   val tokenToChar = Map(p0Token -> p0TokenChar, p1Token -> p1TokenChar, noToken -> noTokenChar)
 
   val diagonal1 = Seq(0, 4, 8)
