@@ -106,7 +106,7 @@ case class TicTacToeState private[tictactoe](state: Int) {//} extends AnyVal {
 
   override def toString: String = {
     StringBuilder.newBuilder
-      .append(s"TicTacToeState($state)")
+      .append(s"TicTacToeState($state)\n")
       .append(tokenToChar(playerTokens(currentPlayer))).append(" to move next\n")
       .append(toCharArray.grouped(3).mkString("\n"))
       .toString()
