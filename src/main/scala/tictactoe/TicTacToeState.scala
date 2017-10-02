@@ -27,7 +27,7 @@ object TicTacToeState {
   *              correspond to the middle field of the top row, and so on. The 18th bit form the right
   *              contains the next player
   */
-case class TicTacToeState private[tictactoe](state: Int) {//} extends AnyVal {
+case class TicTacToeState private[tictactoe](state: Int) {
 
   def tokenAt(i: Int): Token =
     (state >> (2 * i)) & 3
