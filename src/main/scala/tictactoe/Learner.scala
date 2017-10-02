@@ -11,7 +11,7 @@ object Learner {
   val discountFactor = 0.5d
 
 
-  val episodes = 2500
+  val episodes = 250000
   val seed = 0
   val rnd = new Random(seed)
 
