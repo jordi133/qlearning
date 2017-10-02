@@ -27,12 +27,12 @@ object TicTacToeState {
   *              correspond to the middle field of the top row, and so on. The 18th bit form the right
   *              contains the next player
   */
-case class TicTacToeState private[tictactoe](state: Int) extends AnyVal {
+case class TicTacToeState private[tictactoe](state: Int) {//} extends AnyVal {
 
   def tokenAt(i: Int): Token =
     (state >> (2 * i)) & 3
 
-  def currentPlayer: Player = (state >> (2 * TicTacToeState.stateSize)) & 1
+  lazy val currentPlayer: Player = (state >> (2 * TicTacToeState.stateSize)) & 1
 
   def updateTokenAt(index: Int): Int = state + (playerTokens(currentPlayer) << (2 * index))
 
@@ -60,6 +60,8 @@ case class TicTacToeState private[tictactoe](state: Int) extends AnyVal {
       Right(TicTacToeState(newIntState))
     }
   }
+
+  def forceMove(index: Int): TicTacToeState = TicTacToeState(updateTokenAt(index) ^ (1 << (2 * TicTacToeState.stateSize)))
 
   /**
     * Function calculates whether the game can be won by the current player
@@ -98,12 +100,13 @@ case class TicTacToeState private[tictactoe](state: Int) extends AnyVal {
     }
   }
 
-  def getPossibleMoves: IndexedSeq[Int] = (0 until TicTacToeState.stateSize).filter(tokenAt(_) == noToken)
+  lazy val getPossibleMoves: IndexedSeq[Int] = (0 until TicTacToeState.stateSize).filter(tokenAt(_) == noToken)
 
   def toCharArray: IndexedSeq[Char] = for (i <- 0 until TicTacToeState.stateSize) yield tokenToChar(tokenAt(i))
 
   override def toString: String = {
     StringBuilder.newBuilder
+      .append(s"TicTacToeState($state)")
       .append(tokenToChar(playerTokens(currentPlayer))).append(" to move next\n")
       .append(toCharArray.grouped(3).mkString("\n"))
       .toString()
