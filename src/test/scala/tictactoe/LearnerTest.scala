@@ -6,19 +6,20 @@ import org.scalatest.{Matchers, WordSpec}
   * Created by Jordi on 1-10-2017.
   */
 class LearnerTest extends WordSpec with Matchers {
+
+  "runEpisode" should {
+    "create 8 states in the matrix" in {
+      val learner = new Learner()
+      learner.runEpisode(0)
+      learner.matrix.size shouldBe 9
+    }
+  }
+
   "qLearning" should {
     "print sensible results" in {
-val t0 = System.currentTimeMillis()
-      val result = Learner.qLearning
-
-      val nearlyFinishedMatrix = result.filter { case ((state, _), q) =>
-        state.getPossibleMoves.size == 1 && (state.state & 1 << 18) == 0
-      }
-
-      nearlyFinishedMatrix.foreach { case ((state, action), q) =>
-        println(state)
-        println(s"$action -> q = $q")
-      }
+      val learner = new Learner()
+      val t0 = System.currentTimeMillis()
+      val result = learner.qLearning
 
       // TODO Find out why results first seem to converge to logical values (after 2500 games), and then diverge (at 250000)
       /* values for 2500 (makes sense)
@@ -44,12 +45,12 @@ val t0 = System.currentTimeMillis()
         3: q = 0.012694239613117447
         0: q = 0.025792897562616622
        */
-      val justStartingMatrix = result.filter { case ((state, _), q) =>
+      val justStartingMatrix = result.filter { case (state, _) =>
         state.getPossibleMoves.size == 9 && (state.state & 1 << 18) == 0
       }
 
       justStartingMatrix
-        .map { case ((state, action), q) => (action, q) }
+        .values.flatten
         .toSeq.sortBy(_._2)
         .foreach { case (action, q) =>
           println(s"$action: q = $q")
@@ -61,25 +62,28 @@ val t0 = System.currentTimeMillis()
 
       while (game.isRight) {
         val state = game.right.get
-        if (!result.exists { case ((st, _), _) => st == state }) {
+        if (!result.exists { case (st, _) => st == state }) {
           println(s"Empty matrix for next move in:\n$state")
-          val statesVisited = result.filterKeys(_._1.state == state.state)
+          val statesVisited = result.filterKeys(_ == state)
           println(s"Similar states visited: $statesVisited")
           println(s"Time spent: ${t0 - System.currentTimeMillis()}")
         }
-        val nextMove = result.filter { case ((st, _), _) => st == state }.maxBy(_._2)._1._2
+        val nextMove = result(state).maxBy(_._2)._1
+        printQValuesForState(result, game.right.get)
         game = game.move(nextMove)
-        println(game.asString)
-
         // opponent move
         if (game.isRight) {
-          game = game.move(game.right.get.getPossibleMoves.head)
+          game = game.move(learner.bestNextMove(game.right.get))
         }
-
       }
-
     }
-
-
   }
+
+  def printQValuesForState(matrix: Map[TicTacToeState, Map[Int, Double]], state: TicTacToeState): Unit = {
+    println(s"printQValuesForState - $state")
+    matrix(state).toSeq.sortBy(_._2).foreach { case (action, q) =>
+      println(s"$action: q = $q")
+    }
+  }
+
 }
