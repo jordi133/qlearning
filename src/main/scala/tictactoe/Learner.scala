@@ -4,8 +4,10 @@ import scala.util.Random
 
 /**
   * Created by Jordi on 30-9-2017.
+  *
+  * TODO: split learning in several parts: first train against random opponent and then against trained opponent?
   */
-class Learner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episodes: Int = 100000, seed: Int = 0) {
+class Learner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episodes: Int = 10000, seed: Int = 0) {
 
   val defaultQ: Double = 0
   val winReward: Double = 1
@@ -48,7 +50,8 @@ class Learner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episod
         updateMatrix(getReward(winner), 0, previousStatesAndActions)
       case Right(state) =>
         val possibleMoves = state.getPossibleMoves
-        val nextAction = possibleMoves(rnd.nextInt(possibleMoves.size))
+                val nextAction = nextMoveForTraining(state)
+//        val nextAction = possibleMoves(rnd.nextInt(possibleMoves.size))
         val nextState = state.move(nextAction)
         playR(nextState, (state, nextAction) +: previousStatesAndActions)
     }
@@ -63,6 +66,29 @@ class Learner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episod
       val nextPossibleMoves = state.getPossibleMoves
       nextPossibleMoves(rnd.nextInt(nextPossibleMoves.size))
     }
+  }
+
+
+  def nextMoveForTraining(state: TicTacToeState): Int = {
+    def pickFromCumulativeChances(valuesWithChange: Seq[(Int, Double)], roll: Double): Int = valuesWithChange match {
+      case (v, c) +: _ if roll < c => v
+      case (_, c) +: vs => pickFromCumulativeChances(vs, roll - c)
+      case _ => throw new IllegalArgumentException
+    }
+
+    val tau: Double = 0.05
+
+    val nextPossibleMoves = state.getPossibleMoves
+    val qValuesPerMove = nextPossibleMoves.map(move => move -> matrix(state)(move))
+    val boltzmanValuesPerMove = qValuesPerMove.map { case (move, qValue) =>
+      move -> Math.exp(qValue / tau)
+    }
+
+    println(s"boltzmanValuesPerMove: ${boltzmanValuesPerMove.mkString(" | ")}")
+
+    val result = pickFromCumulativeChances(boltzmanValuesPerMove, rnd.nextDouble() * boltzmanValuesPerMove.map(_._2).sum)
+    println(s"result: $result")
+    result
   }
 
 }
