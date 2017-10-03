@@ -8,7 +8,7 @@ import org.scalatest.{Matchers, WordSpec}
 class LearnerTest extends WordSpec with Matchers {
   "qLearning" should {
     "print sensible results" in {
-
+val t0 = System.currentTimeMillis()
       val result = Learner.qLearning
 
       val nearlyFinishedMatrix = result.filter { case ((state, _), q) =>
@@ -63,6 +63,9 @@ class LearnerTest extends WordSpec with Matchers {
         val state = game.right.get
         if (!result.exists { case ((st, _), _) => st == state }) {
           println(s"Empty matrix for next move in:\n$state")
+          val statesVisited = result.filterKeys(_._1.state == state.state)
+          println(s"Similar states visited: $statesVisited")
+          println(s"Time spent: ${t0 - System.currentTimeMillis()}")
         }
         val nextMove = result.filter { case ((st, _), _) => st == state }.maxBy(_._2)._1._2
         game = game.move(nextMove)
