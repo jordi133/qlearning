@@ -2,6 +2,8 @@ package tictactoe
 
 import org.scalatest.{Matchers, WordSpec}
 
+import scala.util.Random
+
 /**
   * Created by Jordi on 1-10-2017.
   */

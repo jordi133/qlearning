@@ -6,7 +6,7 @@ import scala.util.Random
   * Created by Jordi on 30-9-2017.
   *
   * TODO: split learning in several parts: first train against random opponent and then against trained opponent?
-  * TODO: Only learn (update matrix) for moves when 'O' had to move -or- make learning generic for which player is playing
+  * TODO: make learning generic for which player is playing - double learning for each game - Use purestate
   */
 class Learner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episodes: Int = 10000, seed: Int = 0) {
 
@@ -17,6 +17,7 @@ class Learner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episod
   val rnd = new Random(seed)
 
   // Q-matrix, for performance reasons implemented as map of (state -> (action -> q)) instead of flat matrix of (state, action) -> Q
+  // TODO: Map from TicTacToeState.purestate instead of the raw state to learn from both players experience
   var matrix: Map[TicTacToeState, Map[Int, Double]] = Map.empty.withDefaultValue(Map.empty.withDefaultValue(defaultQ))
 
   // playing as p0

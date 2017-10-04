@@ -13,6 +13,11 @@ object TicTacToeState {
   implicit class ImplicitState(state: Either[PlayerId, TicTacToeState]) {
     def move(index: Int): Either[PlayerId, TicTacToeState] = state.flatMap(_.move(index))
 
+    def pureState: Int = state match {
+      case Left(player) => player
+      case Right(st) => st.pureState
+    }
+
     def asString: String = state match {
       case Left(winner) => s"Game won by $winner"
       case Right(st) => st.toString
@@ -28,6 +33,7 @@ object TicTacToeState {
   *              contains the next player
   */
 case class TicTacToeState private[tictactoe](state: Int) {
+
   import TicTacToeState.stateSize
 
   def tokenAt(i: Int): Token =
@@ -111,5 +117,28 @@ case class TicTacToeState private[tictactoe](state: Int) {
       .append(tokenToChar(playerTokens(currentPlayer))).append(" to move next\n")
       .append(toCharArray.grouped(3).mkString("\n"))
       .toString()
+  }
+
+  /**
+    * Return the state from the perspective of the current player: locations with own token are marked '01' and locations with opponents token
+    * are marked '10'. This facilitates learning from both sides of a certain game
+    *
+    * @return
+    */
+  def pureState: Int = {
+    if (currentPlayer == p0) {
+      state
+    }
+    else {
+      var result = 0
+      for (i <- 0 until stateSize) {
+        tokenAt(i) match {
+          case `noToken` =>
+          case `p0Token` => result += (p1Token << 2 * i)
+          case `p1Token` => result += (p0Token << 2 * i)
+        }
+      }
+      result
+    }
   }
 }

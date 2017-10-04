@@ -128,6 +128,14 @@ class TicTacToeStateTest extends WordSpec with Matchers {
     }
   }
 
+  "pureState" should {
+    "be reflexive for both players" in {
+      val sp0 = TicTacToeState.newState(p0)
+      val sp1 = TicTacToeState.newState(p1)
+      sp0.move(1).move(3).move(2).pureState shouldBe sp1.move(1).move(3).move(2).pureState
+    }
+  }
+
   def stateAsInt(state: Vector[Char], currentPlayer: Int = 0) = {
     val tokenval = Map(p0TokenChar -> 1, p1TokenChar -> 2, noTokenChar -> 0)
 
