@@ -8,10 +8,10 @@ object TicTacToeState {
   val stateSize = 9
   val emptyState = 0
 
-  def newState(startingPlayer: Player) = TicTacToeState(emptyState + (startingPlayer << (2 * stateSize)))
+  def newState(startingPlayer: PlayerId) = TicTacToeState(emptyState + (startingPlayer << (2 * stateSize)))
 
-  implicit class ImplicitState(state: Either[Player, TicTacToeState]) {
-    def move(index: Int): Either[Player, TicTacToeState] = state.flatMap(_.move(index))
+  implicit class ImplicitState(state: Either[PlayerId, TicTacToeState]) {
+    def move(index: Int): Either[PlayerId, TicTacToeState] = state.flatMap(_.move(index))
 
     def asString: String = state match {
       case Left(winner) => s"Game won by $winner"
@@ -28,11 +28,12 @@ object TicTacToeState {
   *              contains the next player
   */
 case class TicTacToeState private[tictactoe](state: Int) {
+  import TicTacToeState.stateSize
 
   def tokenAt(i: Int): Token =
     (state >> (2 * i)) & 3
 
-  lazy val currentPlayer: Player = (state >> (2 * TicTacToeState.stateSize)) & 1
+  lazy val currentPlayer: PlayerId = (state >> (2 * stateSize)) & 1
 
   def updateTokenAt(index: Int): Int = state + (playerTokens(currentPlayer) << (2 * index))
 
@@ -43,7 +44,7 @@ case class TicTacToeState private[tictactoe](state: Int) {
     * @return
     */
   def move(index: Int): MoveResult = {
-    require(index >= 0 && index < TicTacToeState.stateSize, s"Cannot place token on $index")
+    require(index >= 0 && index < stateSize, s"Cannot place token on $index")
     require(tokenAt(index) == noToken, s"Cannot place token on $index in $this")
 
     if (isWonByMove(index)) {
@@ -52,7 +53,7 @@ case class TicTacToeState private[tictactoe](state: Int) {
       Left(pDraw)
     } else {
       // Update token and flip bit representing next player
-      val newIntState = updateTokenAt(index) ^ (1 << (2 * TicTacToeState.stateSize))
+      val newIntState = updateTokenAt(index) ^ (1 << (2 * stateSize))
 
       // If only 1 token is on the board, normalize state by rotating TODO
       // If 2 tokens on the board, normalize by mirroring  TODO
@@ -61,7 +62,7 @@ case class TicTacToeState private[tictactoe](state: Int) {
     }
   }
 
-  def forceMove(index: Int): TicTacToeState = TicTacToeState(updateTokenAt(index) ^ (1 << (2 * TicTacToeState.stateSize)))
+  def forceMove(index: Int): TicTacToeState = TicTacToeState(updateTokenAt(index) ^ (1 << (2 * stateSize)))
 
   /**
     * Function calculates whether the game can be won by the current player
@@ -100,9 +101,9 @@ case class TicTacToeState private[tictactoe](state: Int) {
     }
   }
 
-  lazy val getPossibleMoves: IndexedSeq[Int] = (0 until TicTacToeState.stateSize).filter(tokenAt(_) == noToken)
+  lazy val getPossibleMoves: IndexedSeq[Int] = (0 until stateSize).filter(tokenAt(_) == noToken)
 
-  def toCharArray: IndexedSeq[Char] = for (i <- 0 until TicTacToeState.stateSize) yield tokenToChar(tokenAt(i))
+  def toCharArray: IndexedSeq[Char] = for (i <- 0 until stateSize) yield tokenToChar(tokenAt(i))
 
   override def toString: String = {
     StringBuilder.newBuilder

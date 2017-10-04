@@ -3,9 +3,9 @@
   */
 package object tictactoe {
 
-  type Player = Int
+  type PlayerId = Int
   // either Left(winning player) or Right(resulting board after move)
-  type MoveResult = Either[Player, TicTacToeState]
+  type MoveResult = Either[PlayerId, TicTacToeState]
 
   type Token = Int
 

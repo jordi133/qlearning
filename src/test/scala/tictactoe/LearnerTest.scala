@@ -11,7 +11,7 @@ class LearnerTest extends WordSpec with Matchers {
     "create 8 states in the matrix" in {
       val learner = new Learner()
       learner.runEpisode(0)
-      learner.matrix.size shouldBe 8
+      learner.matrix.size shouldBe 9
     }
   }
 
