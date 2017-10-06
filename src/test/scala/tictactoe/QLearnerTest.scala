@@ -5,10 +5,10 @@ import org.scalatest.{Matchers, WordSpec}
 /**
   * Created by Jordi on 1-10-2017.
   */
-class LearnerTest extends WordSpec with Matchers {
+class QLearnerTest extends WordSpec with Matchers {
 
   "qLearning" should {
-    val learner = new Learner(learningRate = 0.2d, discountFactor = 0.5d, episodes = 10000, seed = 0)
+    val learner = new QLearner(learningRate = 0.2d, discountFactor = 0.5d, episodes = 10000, seed = 0)
     val result = learner.qLearning
     "give highest Q Value to the move preventing the opponent from winning" in {
       val state = TicTacToeState.newState(p0)
