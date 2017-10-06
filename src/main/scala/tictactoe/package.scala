@@ -28,12 +28,4 @@ package object tictactoe {
   val playerTokens = Map(p0 -> p0Token, p1 -> p1Token)
   val tokenToChar = Map(p0Token -> p0TokenChar, p1Token -> p1TokenChar, noToken -> noTokenChar)
 
-  val diagonal1 = Seq(0, 4, 8)
-  val diagonal2 = Seq(2, 4, 6)
-
-  def liesOnDiagonal1(index: Int): Boolean = diagonal1.contains(index)
-
-  def liesOnDiagonal2(index: Int): Boolean = diagonal2.contains(index)
-
-
 }

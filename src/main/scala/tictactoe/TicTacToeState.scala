@@ -7,6 +7,8 @@ package tictactoe
 object TicTacToeState {
   val stateSize = 9
   val emptyState = 0
+  val diagonal1 = Seq(0, 4, 8)
+  val diagonal2 = Seq(2, 4, 6)
 
   def newState(startingPlayer: PlayerId) = TicTacToeState(emptyState + (startingPlayer << (2 * stateSize)))
 
@@ -36,7 +38,7 @@ object TicTacToeState {
   */
 case class TicTacToeState private[tictactoe](state: Int) {
 
-  import TicTacToeState.stateSize
+  import TicTacToeState.{stateSize, diagonal1, diagonal2}
 
   def tokenAt(i: Int): Token =
     (state >> (2 * i)) & 3
@@ -88,13 +90,13 @@ case class TicTacToeState private[tictactoe](state: Int) {
 
     // if index is on diagonal, generate indices of diagonal
     val diagonal1Indices =
-      if (liesOnDiagonal1(index)) {
+      if (diagonal1.contains(index)) {
         Some(diagonal1.filter(_ != index))
       } else {
         None
       }
     val diagonal2Indices =
-      if (liesOnDiagonal2(index)) {
+      if (diagonal2.contains(index)) {
         Some(diagonal2.filter(_ != index))
       } else {
         None
