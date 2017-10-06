@@ -7,7 +7,13 @@ package object tictactoe {
   // either Left(winning player) or Right(resulting board after move)
   type MoveResult = Either[PlayerId, TicTacToeState]
 
+  type Action = Int
+
+  type QMatrix = Map[PureState, Map[Action, Double]]
+
   type Token = Int
+
+  type PureState = Int
 
   val pDraw = -1
   val p0 = 0

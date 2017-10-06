@@ -31,6 +31,8 @@ object TicTacToeState {
   *              to the topleft field, containing 00 for '-', 01 for 'O' and 10 for 'X'. The next two
   *              correspond to the middle field of the top row, and so on. The 18th bit form the right
   *              contains the next player
+  *
+  *              Extending AnyVal seems slightly faster (for now)
   */
 case class TicTacToeState private[tictactoe](state: Int) {
 
@@ -61,13 +63,13 @@ case class TicTacToeState private[tictactoe](state: Int) {
       // Update token and flip bit representing next player
       val newIntState = updateTokenAt(index) ^ (1 << (2 * stateSize))
 
-      // If only 1 token is on the board, normalize state by rotating TODO
-      // If 2 tokens on the board, normalize by mirroring  TODO
-
       Right(TicTacToeState(newIntState))
     }
   }
 
+  /**
+    * Performs a move without checking whether game will be won or whether a token is overrwritten
+    */
   def forceMove(index: Int): TicTacToeState = TicTacToeState(updateTokenAt(index) ^ (1 << (2 * stateSize)))
 
   /**
@@ -109,23 +111,26 @@ case class TicTacToeState private[tictactoe](state: Int) {
 
   lazy val getPossibleMoves: IndexedSeq[Int] = (0 until stateSize).filter(tokenAt(_) == noToken)
 
-  def toCharArray: IndexedSeq[Char] = for (i <- 0 until stateSize) yield tokenToChar(tokenAt(i))
-
   override def toString: String = {
     StringBuilder.newBuilder
       .append(s"TicTacToeState($state)\n")
       .append(tokenToChar(playerTokens(currentPlayer))).append(" to move next\n")
-      .append(toCharArray.grouped(3).mkString("\n"))
+      .append(boardAsString)
       .toString()
   }
+
+  def boardAsString: String = toCharArray.grouped(3).mkString("\n")
+
+  def toCharArray: IndexedSeq[Char] = for (i <- 0 until stateSize) yield tokenToChar(tokenAt(i))
 
   /**
     * Return the state from the perspective of the current player: locations with own token are marked '01' and locations with opponents token
     * are marked '10'. This facilitates learning from both sides of a certain game
+    * TODO: normalize state so that type cardinality is minimized by rotating and mirroring the board
     *
     * @return
     */
-  def pureState: Int = {
+  lazy val pureState: PureState = {
     if (currentPlayer == p0) {
       state
     }
@@ -134,8 +139,8 @@ case class TicTacToeState private[tictactoe](state: Int) {
       for (i <- 0 until stateSize) {
         tokenAt(i) match {
           case `noToken` =>
-          case `p0Token` => result += (p1Token << 2 * i)
-          case `p1Token` => result += (p0Token << 2 * i)
+          case `p0Token` => result += (p1Token << (2 * i))
+          case `p1Token` => result += (p0Token << (2 * i))
         }
       }
       result

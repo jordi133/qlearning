@@ -12,6 +12,8 @@ lazy val root = (project in file("."))
       "org.scalactic" %% "scalactic" % scalaTestV % "test",
       "org.scalatest" %% "scalatest" % scalaTestV % "test",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
+      "com.storm-enroute" %% "scalameter" % "0.8.2",
       "junit" % "junit" % "4.8.1" % "test"
-    ))
-  
+    ),
+    Defaults.itSettings)
+  .configs(IntegrationTest)
