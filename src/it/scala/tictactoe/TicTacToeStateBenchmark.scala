@@ -7,6 +7,7 @@ import scala.util.Random
 /**
   * Created by Jordi on 1-10-2017.
   */
+
 object TicTacToeStateBenchmark extends Bench.ForkedTime {
 
   measure method "map" in {
@@ -23,7 +24,7 @@ object TicTacToeStateBenchmark extends Bench.ForkedTime {
       val nextMoves = state.getPossibleMoves
       val nextMove = nextMoves(random.nextInt(nextMoves.size))
       state.move(nextMove) match {
-        case Left(winner) => winner
+        case Left((winner, _)) => winner
         case Right(newState) => playUntilWin(newState)
       }
     }

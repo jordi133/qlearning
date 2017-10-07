@@ -39,7 +39,7 @@ class QLearner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episo
   def runEpisode(startingPlayer: Int): Unit = playGame(Right(TicTacToeState.newState(startingPlayer)))
 
   def playGame(mr: MoveResult, previousStatesAndActions: Seq[(TicTacToeState, Int)] = Seq.empty): Unit = mr match {
-    case Left(winner) =>
+    case Left((winner, _)) =>
       // Separate previousStatesAndActions per player
       val (p0StatesAndActions, p1StatesAndActions) = separateStatesAndActionsPerPlayer(previousStatesAndActions, (Seq.empty, Seq.empty))
       // Call updateMatrix twice, once for each player

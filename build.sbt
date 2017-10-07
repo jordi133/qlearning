@@ -17,3 +17,10 @@ lazy val root = (project in file("."))
     ),
     Defaults.itSettings)
   .configs(IntegrationTest)
+
+testFrameworks += new TestFramework(
+  "org.scalameter.ScalaMeterFramework")
+
+logBuffered := false
+
+parallelExecution in IntegrationTest := false

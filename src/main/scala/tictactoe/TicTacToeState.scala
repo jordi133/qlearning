@@ -12,16 +12,16 @@ object TicTacToeState {
 
   def newState(startingPlayer: PlayerId) = TicTacToeState(emptyState + (startingPlayer << (2 * stateSize)))
 
-  implicit class ImplicitState(state: Either[PlayerId, TicTacToeState]) {
-    def move(index: Int): Either[PlayerId, TicTacToeState] = state.flatMap(_.move(index))
+  implicit class ImplicitState(state: MoveResult) {
+    def move(index: Int): MoveResult = state.flatMap(_.move(index))
 
     def pureState: Int = state match {
-      case Left(player) => player
+      case Left((player, _)) => player
       case Right(st) => st.pureState
     }
 
     def asString: String = state match {
-      case Left(winner) => s"Game won by $winner"
+      case Left((winner, board)) => s"Game won by $winner\n${board.boardAsString}"
       case Right(st) => st.toString
     }
   }
@@ -58,9 +58,9 @@ case class TicTacToeState private[tictactoe](state: Int) {
     require(tokenAt(index) == noToken, s"Cannot place token on $index in $this")
 
     if (isWonByMove(index)) {
-      Left(currentPlayer)
+      Left((currentPlayer, forceMove(index)))
     } else if (getPossibleMoves.size == 1) {
-      Left(pDraw)
+      Left(pDraw, forceMove(index))
     } else {
       // Update token and flip bit representing next player
       val newIntState = updateTokenAt(index) ^ (1 << (2 * stateSize))

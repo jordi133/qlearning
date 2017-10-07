@@ -70,7 +70,8 @@ class TicTacToeStateTest extends WordSpec with Matchers {
 
       val result = state.move(0).move(1).move(6).move(2).move(3)
 
-      result.move(4) shouldBe Left(0)
+      val winner = result.move(4).left.get._1
+      winner shouldBe p0
     }
   }
 
