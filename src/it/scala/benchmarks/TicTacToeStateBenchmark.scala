@@ -1,6 +1,7 @@
-package tictactoe
+package benchmarks
 
 import org.scalameter.{Bench, Gen}
+import tictactoe.TicTacToeState
 
 import scala.util.Random
 
