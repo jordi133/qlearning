@@ -68,6 +68,17 @@ class ConnectFourStateTest extends WordSpec with Matchers {
 
       state.pureState shouldBe state.longState
     }
+    "return the same state if the same moves have been played, regarless of starting player" in {
+      val s0 = ConnectFourState.newState(p0)
+        .move(0)
+        .move(1)
+      val s1 = ConnectFourState.newState(p1)
+        .move(0)
+        .move(1)
+
+      s0.pureState shouldBe s1.pureState
+
+    }
   }
 
   "isWonByMove" should {
@@ -81,7 +92,7 @@ class ConnectFourStateTest extends WordSpec with Matchers {
 
       state.right.get.isWonByMove(0) shouldBe false
     }
-    "return true when winning" in {
+    "return true when winning 0" in {
       val state = ConnectFourState.newState(p1)
         .move(0)
         .move(1)
@@ -91,6 +102,45 @@ class ConnectFourStateTest extends WordSpec with Matchers {
         .move(1)
 
       state.right.get.isWonByMove(0) shouldBe true
+    }
+    "return true when winning 1" in {
+      val state = ConnectFourState.newState(p1)
+        .move(0)
+        .move(4)
+        .move(1)
+        .move(4)
+        .move(2)
+        .move(4)
+
+      state.right.get.isWonByMove(3) shouldBe true
+    }
+    "return true when winning 0" in {
+      val state = ConnectFourState.newState(p1)
+        .move(0)
+        .move(1)
+        .move(1)
+        .move(2)
+        .move(2)
+        .move(3)
+        .move(3)
+        .move(4)
+
+      state.right.get.isWonByMove(4) shouldBe true
+    }
+    "return true when winning 0" in {
+      val state = ConnectFourState.newState(p1)
+        .move(0) //0
+        .move(1)
+        .move(1)//0
+        .move(2)
+        .move(2)//0
+        .move(3)
+        .move(2)//0
+        .move(3)
+        .move(3)//0
+        .move(4)
+
+      state.right.get.isWonByMove(3) shouldBe true
     }
   }
 }

@@ -10,7 +10,7 @@ package object connectfour {
 
   type Token = Int
 
-  type PureState = Int
+  type PureState = Long
 
   val pDraw: Int = -1
   val p0: PlayerId = 0

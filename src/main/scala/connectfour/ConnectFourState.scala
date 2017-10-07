@@ -69,6 +69,9 @@ case class ConnectFourState private[connectfour](longState: Long) {
     if (isWonByMove(col)) {
       val newState = processMoveAt(tokensInThisCol, col)
       Left((currentPlayer, ConnectFourState(newState)))
+    } else if (tokensInThisCol == rows - 1) {
+      val newState = processMoveAt(tokensInThisCol, col)
+      Left((pDraw, ConnectFourState(newState)))
     } else {
       val newState = processMoveAt(tokensInThisCol, col)
       Right(ConnectFourState(newState))
@@ -84,11 +87,11 @@ case class ConnectFourState private[connectfour](longState: Long) {
       Seq((c, row), (c + 1, row), (c + 2, row), (c + 3, row)).filter(_ != (col, row))
     }
 
-    val quartetOnCol =
+    val quartetOnColumn =
       if (row >= 3) {
         Some(Seq((col, row - 1), (col, row - 2), (col, row - 3)))
       } else {
-        None //Seq.empty
+        None
       }
 
     val actualDiagonals = diagonals.map {
@@ -98,7 +101,7 @@ case class ConnectFourState private[connectfour](longState: Long) {
       _.exists { case (c, r) => r < 0 || c < 0 || r >= rows || c >= cols }
     }
 
-    val quartetsToCheck = quartetsOnRow ++ quartetOnCol ++ relevantDiagonals
+    val quartetsToCheck = quartetsOnRow ++ quartetOnColumn ++ relevantDiagonals
 
     val willConnectFour = quartetsToCheck.exists { quartet =>
       quartet.forall { case (c, r) =>
