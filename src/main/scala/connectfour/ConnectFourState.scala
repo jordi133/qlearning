@@ -15,10 +15,12 @@ object ConnectFourState {
   val currentPlayerBit = 63
   val colCountOffsets = Array(42, 45, 48, 51, 54, 57, 60)
 
+  private val diagonals1 = Seq((-3, -3), (-2, -2), (-1, -1), (1, 1), (2, 2), (3, 3)).sliding(3).toVector
+  private val diagonals2 = Seq((-3, 3), (-2, 2), (-1, 1), (1, -1), (2, -2), (3, -3)).sliding(3).toVector
+  val diagonals: Vector[Seq[(Int, Int)]] = diagonals1 ++ diagonals2
+
   def newState(startingPlayer: PlayerId): ConnectFourState = {
     val state = startingPlayer.toLong << currentPlayerBit
-    for (c <- 0 until cols) println(s"Tokens in col $c: ${((state >> colCountOffsets(c)) & 7).toInt}")
-
     ConnectFourState(state)
   }
 
@@ -49,7 +51,7 @@ case class ConnectFourState private[connectfour](longState: Long) {
 
   val currentPlayer: PlayerId = (longState >> currentPlayerBit).toInt & 1
 
-  def tokenAt(row: Int, col: Int): Token = {
+  def tokenAt(col: Int, row: Int): Token = {
     val tokensInCol = (longState >> colCountOffsets(col)) & 7
     if (row >= tokensInCol) {
       noToken
@@ -63,12 +65,48 @@ case class ConnectFourState private[connectfour](longState: Long) {
   def move(col: Int): MoveResult = {
     val tokensInThisCol = tokensInCol(col)
     require(tokensInThisCol < rows, s"Column $col already filled in \n$boardAsString")
-    // check for possible win
-    // TODO
 
-    //
-    val newState = processMoveAt(tokensInThisCol, col)
-    Right(ConnectFourState(newState))
+    if (isWonByMove(col)) {
+      val newState = processMoveAt(tokensInThisCol, col)
+      Left((currentPlayer, ConnectFourState(newState)))
+    } else {
+      val newState = processMoveAt(tokensInThisCol, col)
+      Right(ConnectFourState(newState))
+    }
+  }
+
+  def isWonByMove(col: Int): Boolean = {
+    val row = tokensInCol(col)
+    val leftmostRelevantCol = Math.max(col - 3, 0)
+    val rightMostRelevantCol = Math.min(col + 3, cols - 1)
+
+    val quartetsOnRow = (leftmostRelevantCol to rightMostRelevantCol - 3) map { c =>
+      Seq((c, row), (c + 1, row), (c + 2, row), (c + 3, row)).filter(_ != (col, row))
+    }
+
+    val quartetOnCol =
+      if (row >= 3) {
+        Some(Seq((col, row - 1), (col, row - 2), (col, row - 3)))
+      } else {
+        None //Seq.empty
+      }
+
+    val actualDiagonals = diagonals.map {
+      _.map { case (c, r) => (c + col, r + row) }
+    }
+    val relevantDiagonals = actualDiagonals.filterNot {
+      _.exists { case (c, r) => r < 0 || c < 0 || r >= rows || c >= cols }
+    }
+
+    val quartetsToCheck = quartetsOnRow ++ quartetOnCol ++ relevantDiagonals
+
+    val willConnectFour = quartetsToCheck.exists { quartet =>
+      quartet.forall { case (c, r) =>
+        tokenAt(c, r) == currentPlayer
+      }
+    }
+
+    quartetsToCheck.nonEmpty && willConnectFour
   }
 
   /**
@@ -76,7 +114,7 @@ case class ConnectFourState private[connectfour](longState: Long) {
     */
   def processMoveAt(row: Int, col: Int): Long = {
     // Increase counter for nr of tokens in column
-    println(s"processing move for:\n$boardAsString")
+    //    println(s"processing move for:\n$boardAsString")
     val tokenCountInCol = (longState >> colCountOffsets(col)) & 7
     val tokenCountUpdated = longState & ~(7l << colCountOffsets(col)) | ((tokenCountInCol + 1l) << colCountOffsets(col))
     val index = row * cols + col
@@ -85,9 +123,11 @@ case class ConnectFourState private[connectfour](longState: Long) {
     nextPlayerUpdates
   }
 
+  def getPossibleMoves: Seq[Int] = (0 until cols).filter(tokensInCol(_) < rows)
+
   def boardAsString: String = {
     val rowStrings = (0 until rows) map { r =>
-      val tokens = (0 until cols).map(tokenAt(rows - r - 1, _))
+      val tokens = (0 until cols).map(tokenAt(_, rows - r - 1))
       tokens.map(tokenToChar).mkString(" ")
     }
     rowStrings.mkString("\n")
@@ -111,7 +151,7 @@ case class ConnectFourState private[connectfour](longState: Long) {
       t <- 0 until tokensInCol(c) // check how many tokens are in it
     } {
       // xor each bit with currentPlayerIndex
-      result = result ^ (1l << t * rows + c)
+      result = result ^ (currentPlayer.toLong << t * rows + c)
     }
 
     // set current player bit to 0
