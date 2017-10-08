@@ -1,5 +1,7 @@
 package connectfour
 
+import qlearning._
+
 /**
   * 7 column 6 row (row 0 is bottom row, row 5 is top row) game
   *
@@ -24,28 +26,30 @@ object ConnectFourState {
     ConnectFourState(state)
   }
 
-  implicit class ImplicitState(state: MoveResult) {
-    def move(index: Int): MoveResult = state.flatMap(_.move(index))
-
-    def pureState: Long = state match {
-      case Left((player, _)) => player
-      case Right(st) => st.pureState
-    }
-
-    def asString: String = state match {
-      case Left((winner, board)) => s"Game won by $winner\n${board.boardAsString}"
-      case Right(st) => st.toString
-    }
-
-    def longState: Long = state match {
-      case Left((_, st)) => st.longState
-      case Right(st) => st.longState
-    }
-  }
+//  implicit class ImplicitState(state: MoveResult) {
+//    def move(index: Int): MoveResult = state.flatMap(_.move(index))
+//
+//    def pureState: Long = state match {
+//      case Left((player, _)) => player
+//      case Right(st) => st.pureState
+//    }
+//
+//    def asString: String = state match {
+//      case Left((winner, board)) => s"Game won by $winner\n${board.boardAsString}"
+//      case Right(st) => st.toString
+//    }
+//
+//    def longState: Long = state match {
+//      case Left((_, st)) => st.longState
+//      case Right(st) => st.longState
+//    }
+//  }
 
 }
 
-case class ConnectFourState private[connectfour](longState: Long) {
+case class ConnectFourState private[connectfour](longState: Long) extends GameState[Long] {
+
+//  override type SelfType = this.type
 
   import ConnectFourState._
 
@@ -68,17 +72,17 @@ case class ConnectFourState private[connectfour](longState: Long) {
 
     if (isWonByMove(col)) {
       val newState = processMoveAt(tokensInThisCol, col)
-      Left((currentPlayer, ConnectFourState(newState)))
+      Left((currentPlayer, ConnectFourState(newState).asInstanceOf[this.type]))
     } else if (tokensInThisCol == rows - 1) {
       val newState = processMoveAt(tokensInThisCol, col)
-      Left((pDraw, ConnectFourState(newState)))
+      Left((pDraw, ConnectFourState(newState).asInstanceOf[this.type]))
     } else {
       val newState = processMoveAt(tokensInThisCol, col)
-      Right(ConnectFourState(newState))
+      Right(ConnectFourState(newState).asInstanceOf[this.type])
     }
   }
 
-  def isWonByMove(col: Int): Boolean = {
+  def isWonByMove(col: Action): Boolean = {
     val row = tokensInCol(col)
     val leftmostRelevantCol = Math.max(col - 3, 0)
     val rightMostRelevantCol = Math.min(col + 3, cols - 1)

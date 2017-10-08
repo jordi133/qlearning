@@ -1,5 +1,5 @@
 package qlearning
 
-class Player[G <: Game[_]] {
-
+trait Player[G <: GameState[_]] {
+  def getNextMove(state: G): Int
 }

@@ -2,8 +2,9 @@ package connectfour
 
 import scala.util.Random
 
+import qlearning._
 
-object TrainedPlayer {
+object TrainedConnectFourPlayer {
   /**
     * Selects next best move, or a random move if this state has not been trained yet
     */
@@ -41,8 +42,8 @@ object TrainedPlayer {
   }
 }
 
-class TrainedPlayer(matrix: QMatrix, seed: Int) extends Player {
+class TrainedConnectFourPlayer(matrix: QMatrix, seed: Int) extends ConnectFourPlayer {
   val rnd = new Random(seed)
 
-  override def getNextMove(state: ConnectFourState): Action = TrainedPlayer.getNextBestMove(state, matrix, rnd)
+  override def getNextMove(state: ConnectFourState): Action = TrainedConnectFourPlayer.getNextBestMove(state, matrix, rnd)
 }

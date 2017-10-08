@@ -2,6 +2,8 @@ package connectfour
 
 import scala.util.Random
 
+import qlearning._
+
 class QLearner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episodes: Int = 100000, seed: Int = 0) {
 
     val defaultQ: Double = 0
@@ -43,7 +45,7 @@ class QLearner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episo
         updateMatrix(getReward(winner), 0, p0StatesAndActions)
         updateMatrix(-getReward(winner), 0, p1StatesAndActions)
       case Right(state) =>
-        val nextAction = TrainedPlayer.nextMoveForTraining(state, qMatrix, rnd)
+        val nextAction = TrainedConnectFourPlayer.nextMoveForTraining(state, qMatrix, rnd)
         val nextState = state.move(nextAction)
         playGame(nextState, (state, nextAction) +: previousStatesAndActions)
     }

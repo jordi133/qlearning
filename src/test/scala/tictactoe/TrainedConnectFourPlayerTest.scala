@@ -4,7 +4,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 import scala.util.Random
 
-class TrainedPlayerTest  extends WordSpec with Matchers {
+class TrainedConnectFourPlayerTest  extends WordSpec with Matchers {
 
   "getNextBestMove" should {
     "Pick action with highest Q Value" in {

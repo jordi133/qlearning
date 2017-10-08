@@ -1,6 +1,6 @@
 package qlearning
 
-class QLearner[G <: Game](trainingOpponent: Player[G]) {
+class QLearner[G <: GameState[_]](trainingOpponent: Player[G]) {
 
 
 }
