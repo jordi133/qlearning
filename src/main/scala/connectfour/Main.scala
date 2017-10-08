@@ -10,7 +10,7 @@ object Main extends App {
     val t0 = System.currentTimeMillis()
     val rnd = new Random(seed)
     println(s"Training opponent with seed $seed")
-    val learner = new QLearner(learningRate = 0.2d, discountFactor = 0.5d, episodes = 10000, seed = rnd.nextInt())
+    val learner = new QLearner(learningRate = 0.2d, discountFactor = 0.5d, episodes = 1000000, seed = rnd.nextInt())
     val qMatrix = learner.qLearning
     val opponent = new TrainedPlayer(qMatrix, rnd.nextInt())
     println(s"Finished training (took ${System.currentTimeMillis() - t0} ms)")

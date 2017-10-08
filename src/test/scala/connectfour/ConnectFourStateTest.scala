@@ -31,7 +31,7 @@ class ConnectFourStateTest extends WordSpec with Matchers {
         r <- 0 until rows
         c <- 0 until cols
       } {
-        state.tokenAt( c, r) shouldBe noToken
+        state.tokenAt(c, r) shouldBe noToken
       }
       state.tokensInCol(0) shouldBe 0
     }
@@ -114,31 +114,30 @@ class ConnectFourStateTest extends WordSpec with Matchers {
 
       state.right.get.isWonByMove(3) shouldBe true
     }
-    "return true when winning 0" in {
+    "return true when winning 2" in {
       val state = ConnectFourState.newState(p1)
-        .move(0)
-        .move(1)
-        .move(1)
-        .move(2)
-        .move(2)
+        .move(0) // - - - - - - -
+        .move(1) // - - - - - - -
+        .move(1) // - - - - - - -
+        .move(2) // - X X X - - -
+        .move(2) // X O O O - - -
         .move(3)
         .move(3)
-        .move(4)
 
       state.right.get.isWonByMove(4) shouldBe true
     }
-    "return true when winning 0" in {
+    "return true when winning 3" in {
       val state = ConnectFourState.newState(p1)
-        .move(0) //0
-        .move(1)
-        .move(1)//0
+        .move(0) // - - - - - - -
+        .move(1) // - - - - - - -
+        .move(1) // - - X X - - -
+        .move(2) // - X X O - - -
+        .move(2) // X O O O - O -
+        .move(3)
         .move(2)
-        .move(2)//0
         .move(3)
-        .move(2)//0
         .move(3)
-        .move(3)//0
-        .move(4)
+        .move(5)
 
       state.right.get.isWonByMove(3) shouldBe true
     }

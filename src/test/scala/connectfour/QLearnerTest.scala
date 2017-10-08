@@ -1,5 +1,7 @@
 package connectfour
 
+import java.lang.instrument.Instrumentation
+
 import org.scalatest.{Matchers, WordSpec}
 
 class QLearnerTest extends WordSpec with Matchers {
@@ -9,6 +11,7 @@ class QLearnerTest extends WordSpec with Matchers {
     val t0 = System.currentTimeMillis()
     val result = learner.qLearning
     val dt =System.currentTimeMillis() - t0
+
     "give highest Q Value to the move preventing the opponent from winning" in {
       println(s"training took $dt ms")
 
