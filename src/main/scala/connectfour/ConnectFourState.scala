@@ -41,6 +41,30 @@ object ConnectFourState {
       case Left((_, st)) => st.longState
       case Right(st) => st.longState
     }
+
+    def tokenAt(c: Int, r: Int): Token = state match {
+      case Left((_, st)) => st.tokenAt(c, r)
+      case Right(st) => st.tokenAt(c, r)
+    }
+  }
+
+  /**
+    * Precondition: all states are not yet won by any player
+    * pre condition: all states had p0 starting (ie are derived from purestate)
+    * If s0 and s1 cannot converge, but there is a s2 for which s0 and s2 can converge, and s1 and s2 can converge. Then this should be one group
+    * So, for non convergence we should take into account only filled positions and ensure that they differ.
+    */
+  def groupByNonConvergence(states: Set[MoveResult]): Iterable[Set[MoveResult]] = {
+    // First, find set of positions that are filled for each s in states
+    val allPositions = for {r <- 0 until rows
+                            c <- 0 until cols} yield (c, r)
+    val filledPositions = allPositions.filter { case (c, r) => !states.exists(_.tokenAt(c, r) == noToken) }
+    // For every state, map the filled positions to the tokens
+    val tokensOnFilledPositionsPerState = states.map(s => filledPositions.map { case (c, r) => (c, r) -> s.tokenAt(c, r) } -> s)
+    // Group by this sequence of tokens
+    val groupedOnTokens = tokensOnFilledPositionsPerState.groupBy(_._1)
+    // Grab the values and from within that, drop the sequence of tokens
+    groupedOnTokens.values.map(_.map(_._2))
   }
 
 }
@@ -117,7 +141,6 @@ case class ConnectFourState private[connectfour](longState: Long) {
     */
   def processMoveAt(row: Int, col: Int): Long = {
     // Increase counter for nr of tokens in column
-    //    println(s"processing move for:\n$boardAsString")
     val tokenCountInCol = (longState >> colCountOffsets(col)) & 7
     val tokenCountUpdated = longState & ~(7l << colCountOffsets(col)) | ((tokenCountInCol + 1l) << colCountOffsets(col))
     val index = row * cols + col
@@ -159,5 +182,14 @@ case class ConnectFourState private[connectfour](longState: Long) {
 
     // set current player bit to 0
     result & ~(1l << currentPlayerBit)
+  }
+
+  def startingPlayer: Int = {
+    val totalNrOfTokens = (0 until cols).map { c => tokensInCol(c) }.sum
+    if (totalNrOfTokens % 2 == 0) {
+      currentPlayer
+    } else {
+      1 - currentPlayer
+    }
   }
 }

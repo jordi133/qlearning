@@ -1,20 +1,23 @@
 package connectfour
 
-import java.lang.instrument.Instrumentation
-
 import org.scalatest.{Matchers, WordSpec}
 
 class QLearnerTest extends WordSpec with Matchers {
 
+  "improvedQLearning" should {
+    "group states correctly" in {
+      val learner = new QLearner(learningRate = 0.5d, discountFactor = 0.8d, episodes = 1000000, seed = 0)
+      val t0 = System.currentTimeMillis()
+      val result = learner.improvedQLearning
+      val dt =System.currentTimeMillis() - t0
+    }
+  }
+
   "qLearning" should {
-    val learner = new QLearner(learningRate = 0.5d, discountFactor = 0.8d, episodes = 1000000, seed = 0)
-    val t0 = System.currentTimeMillis()
-    val result = learner.qLearning
-    val dt =System.currentTimeMillis() - t0
+    lazy val learner = new QLearner(learningRate = 0.5d, discountFactor = 0.8d, episodes = 1000000, seed = 0)
+    lazy val result = learner.qLearning
 
     "give highest Q Value to the move preventing the opponent from winning" in {
-      println(s"training took $dt ms")
-
       val state = ConnectFourState.newState(p0)
         .move(0) // - - - - - - -
         .move(1) // - - - - - - -
@@ -36,8 +39,6 @@ class QLearnerTest extends WordSpec with Matchers {
       }
     }
     "Give highest Q Value to winning move" in {
-      println(s"training took $dt ms")
-
       val state = ConnectFourState.newState(p0)
         .move(0) // - - - - - - -
         .move(1) // - - - - - - -
