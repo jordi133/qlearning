@@ -12,16 +12,17 @@ object Main extends App {
     val t0 = System.currentTimeMillis()
     val rnd = new Random(seed)
     println(s"Training opponent with seed $seed")
-    val learner = new QLearner(learningRate = 0.2d, discountFactor = 0.5d, episodes = 1000000, seed = rnd.nextInt())
-    val qMatrix = learner.qLearning
-    val opponent = new TrainedConnectFourPlayer(qMatrix, rnd.nextInt())
+    val learner = new QLearner[Long, ConnectFourState](learningRate = 0.2d, discountFactor = 0.5d, episodes = 100000, seed = rnd.nextInt())
+    val qMatrix = learner.qLearning(startingPlayer => ConnectFourState.newState(startingPlayer))
+//    val opponent = new TrainedConnectFourPlayer(qMatrix, rnd.nextInt())
+    val opponent = new TrainedPlayer[Long, ConnectFourState](qMatrix, rnd.nextInt())
     println(s"Finished training (took ${System.currentTimeMillis() - t0} ms)")
 
     var stop = false
     while (!stop) {
       val startingPlayer = rnd.nextInt(2)
       val newGame = ConnectFourState.newState(startingPlayer)
-      val winner = playGame(newGame, opponent)
+      val winner = playGame(Right(newGame), opponent)
       if (winner == p0) {
         println("You won")
       } else if (winner == pDraw) {
@@ -48,36 +49,18 @@ object Main extends App {
     }
   }
 
-  def playGame(gameState: ConnectFourState, opponent: ConnectFourPlayer): PlayerId = {
-    println(gameState.toString)
-    val index = readIndex(gameState.getPossibleMoves)
-    val newState = gameState.move(index)
-
-    newState match {
-      case Left((winner, _)) =>
-        winner
-      case Right(state) =>
-        println(state.toString)
-        val index = opponent.getNextMove(state)
-        state.move(index) match {
-          case Left((winner, _)) => winner
-          case Right(st) => playGame(st, opponent)
-        }
-    }
+  def playGame(mr: MoveResult[ConnectFourState], opponent: TrainedPlayer[_, ConnectFourState]): PlayerId = mr match {
+    case Left((winner, _)) =>
+      winner
+    case Right(state) if state.currentPlayer == p0 =>
+      println(state.toString)
+      val index = readIndex(state.getPossibleMoves)
+      val newState = state.move(index)
+      playGame(newState, opponent)
+    case Right(state) =>
+      println(state.toString)
+      val index = opponent.getNextMove(state)
+      val newState = state.move(index)
+      playGame(newState, opponent)
   }
-
-  //  def playGame(mr: MoveResult, opponent: ConnectFourPlayer): PlayerId = mr match {
-  //    case Left((winner, _)) =>
-  //      winner
-  //    case Right(state) if state.currentPlayer == p0 =>
-  //      println(state.toString)
-  //      val index = readIndex(state.getPossibleMoves)
-  //      val newState = state.move(index)
-  //      playGame(newState, opponent)
-  //    case Right(state) =>
-  //      println(state.toString)
-  //      val index = opponent.getNextMove(state)
-  //      val newState = state.move(index)
-  //      playGame(newState, opponent)
-  //  }
 }

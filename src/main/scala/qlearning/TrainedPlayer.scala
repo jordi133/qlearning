@@ -1,14 +1,12 @@
-package connectfour
+package qlearning
 
 import scala.util.Random
 
-import qlearning._
-
-object TrainedConnectFourPlayer {
+object TrainedPlayer {
   /**
     * Selects next best move, or a random move if this state has not been trained yet
     */
-  def getNextBestMove(state: ConnectFourState, qMatrix: QMatrix[Long], rnd: Random): Action = {
+  def getNextBestMove[S, G <: GameState[G, S]](state: G, qMatrix: QMatrix[S], rnd: Random): Action = {
     if (qMatrix(state.pureState).nonEmpty) {
       qMatrix(state.pureState).maxBy(_._2)._1
     } else {
@@ -20,7 +18,7 @@ object TrainedConnectFourPlayer {
   /**
     * Picks a next move randomly based on boltzman distribution (highest Q value has highest chance_
     */
-  def nextMoveForTraining(state: ConnectFourState, qMatrix: QMatrix[Long], rnd: Random): Action = {
+  def nextMoveForTraining[S, G <: GameState[G, S]](state: G, qMatrix: QMatrix[S], rnd: Random): Action = {
     def pickFromCumulativeChances(valuesWithChange: Seq[(Int, Double)], roll: Double): Action = valuesWithChange match {
       case (v, c) +: _ if roll < c => v
       case (_, c) +: vs => pickFromCumulativeChances(vs, roll - c)
@@ -42,8 +40,11 @@ object TrainedConnectFourPlayer {
   }
 }
 
-class TrainedConnectFourPlayer(matrix: QMatrix[Long], seed: Int) extends ConnectFourPlayer {
+class TrainedPlayer[S, G <: GameState[G, S]](matrix: QMatrix[S], seed: Int) extends Player[G] {
+
   val rnd = new Random(seed)
 
-  override def getNextMove(state: ConnectFourState): Action = TrainedConnectFourPlayer.getNextBestMove(state, matrix, rnd)
+  override def getNextMove(state: G): Action = TrainedPlayer.getNextBestMove(state, matrix, rnd)
+
+
 }

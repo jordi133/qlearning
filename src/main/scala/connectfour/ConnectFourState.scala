@@ -47,7 +47,7 @@ object ConnectFourState {
 
 }
 
-case class ConnectFourState private[connectfour](longState: Long) extends GameState[Long] {
+case class ConnectFourState private[connectfour](longState: Long) extends GameState[ConnectFourState, Long] {
 
 //  override type SelfType = this.type
 
@@ -66,7 +66,7 @@ case class ConnectFourState private[connectfour](longState: Long) extends GameSt
 
   def tokensInCol(col: Int): Int = ((longState >> colCountOffsets(col)) & 7).toInt
 
-  def move(col: Int): MoveResult = {
+  def move(col: Int): MoveResult[ConnectFourState] = {
     val tokensInThisCol = tokensInCol(col)
     require(tokensInThisCol < rows, s"Column $col already filled in \n$boardAsString")
 

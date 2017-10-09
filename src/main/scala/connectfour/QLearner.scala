@@ -1,10 +1,9 @@
 package connectfour
 
 import scala.util.Random
+import qlearning.{MoveResult, _}
 
-import qlearning._
-
-class QLearner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episodes: Int = 100000, seed: Int = 0) {
+class QLearner[S, G <: GameState[G, S]](learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episodes: Int = 100000, seed: Int = 0) {
 
     val defaultQ: Double = 0
     val winReward: Double = 1
@@ -13,7 +12,7 @@ class QLearner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episo
     val rnd = new Random(seed)
 
     // Q-matrix, for performance reasons implemented as map of (state -> (action -> q)) instead of flat matrix of (state, action) -> Q
-    var qMatrix: QMatrix = Map.empty.withDefaultValue(Map.empty.withDefaultValue(defaultQ))
+    var qMatrix: QMatrix[S] = Map.empty.withDefaultValue(Map.empty.withDefaultValue(defaultQ))
 
     /**
       * Calculated from the perspective of p0
@@ -28,16 +27,19 @@ class QLearner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episo
     /**
       * Main training algorithm
       */
-    def qLearning: QMatrix = {
+    def qLearning(createNewGame: Int => G): QMatrix[S] = {
       for (_ <- 0 until episodes) {
-        runEpisode(rnd.nextInt(2))
+        runEpisode(createNewGame)
       }
       qMatrix
     }
 
-    def runEpisode(startingPlayer: Int): Unit = playGame(Right(ConnectFourState.newState(startingPlayer)))
+    def runEpisode(createNewGame: Int => G): Unit = {
+      val startingPlayer = rnd.nextInt(2)
+      playGame(Right(createNewGame(startingPlayer)))
+    }
 
-    def playGame(mr: MoveResult, previousStatesAndActions: Seq[(ConnectFourState, Int)] = Seq.empty): Unit = mr match {
+    def playGame(mr: MoveResult[G], previousStatesAndActions: Seq[(G, Int)] = Seq.empty): Unit = mr match {
       case Left((winner, _)) =>
         // Separate previousStatesAndActions per player
         val (p0StatesAndActions, p1StatesAndActions) = separateStatesAndActionsPerPlayer(previousStatesAndActions, (Seq.empty, Seq.empty))
@@ -45,7 +47,7 @@ class QLearner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episo
         updateMatrix(getReward(winner), 0, p0StatesAndActions)
         updateMatrix(-getReward(winner), 0, p1StatesAndActions)
       case Right(state) =>
-        val nextAction = TrainedConnectFourPlayer.nextMoveForTraining(state, qMatrix, rnd)
+        val nextAction = TrainedPlayer.nextMoveForTraining[S, G](state, qMatrix, rnd)
         val nextState = state.move(nextAction)
         playGame(nextState, (state, nextAction) +: previousStatesAndActions)
     }
@@ -53,8 +55,8 @@ class QLearner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episo
     /**
       * Combines Seq.partition with a map from ConnectFourState to ConnectFourState.pureState
       */
-    def separateStatesAndActionsPerPlayer(statesAndActions: Seq[(ConnectFourState, Int)],
-                                          acc: (Seq[(PureState, Int)], Seq[(PureState, Int)])): (Seq[(PureState, Int)], Seq[(PureState, Int)]) = {
+    def separateStatesAndActionsPerPlayer(statesAndActions: Seq[(GameState[_, S], Action)],
+                                          acc: (Seq[(S, Action)], Seq[(S, Action)])): (Seq[(S, Action)], Seq[(S, Action)]) = {
       statesAndActions match {
         case (state, action) +: rest =>
           if (state.currentPlayer == p0) {
@@ -70,7 +72,7 @@ class QLearner(learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episo
     /**
       * Updates the qMatrix based on the played game
       */
-    def updateMatrix(reward: Double, maxQNextState: Double, previousStatesAndActions: Seq[(PureState, Int)]): Unit = previousStatesAndActions match {
+    def updateMatrix(reward: Double, maxQNextState: Double, previousStatesAndActions: Seq[(S, Int)]): Unit = previousStatesAndActions match {
       case Nil =>
       case (state, action) +: rest =>
         val currentQ = qMatrix(state)(action)
