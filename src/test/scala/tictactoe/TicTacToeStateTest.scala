@@ -2,6 +2,9 @@ package tictactoe
 
 import org.scalatest.{Matchers, WordSpec}
 
+import qlearning._
+import MoveResultImplicit.ImplicitState
+
 /**
   * Created by Jordi on 30-9-2017.
   */
@@ -65,7 +68,6 @@ class TicTacToeStateTest extends WordSpec with Matchers {
       }
     }
     "return winning player of game is won by this move" in {
-      import TicTacToeState.ImplicitState
       val state = TicTacToeState.newState(p0)
 
       val result = state.move(0).move(1).move(6).move(2).move(3)

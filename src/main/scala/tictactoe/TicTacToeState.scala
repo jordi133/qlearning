@@ -1,5 +1,7 @@
 package tictactoe
 
+import qlearning._
+
 /**
   * Created by Jordi on 30-9-2017.
   */
@@ -12,20 +14,6 @@ object TicTacToeState {
 
   def newState(startingPlayer: PlayerId) = TicTacToeState(emptyState + (startingPlayer << (2 * stateSize)))
 
-  implicit class ImplicitState(state: MoveResult) {
-    def move(index: Int): MoveResult = state.flatMap(_.move(index))
-
-    def pureState: Int = state match {
-      case Left((player, _)) => player
-      case Right(st) => st.pureState
-    }
-
-    def asString: String = state match {
-      case Left((winner, board)) => s"Game won by $winner\n${board.boardAsString}"
-      case Right(st) => st.toString
-    }
-  }
-
 }
 
 /**
@@ -36,7 +24,7 @@ object TicTacToeState {
   *
   *              Extending AnyVal seems slightly faster (for now)
   */
-case class TicTacToeState private[tictactoe](state: Int) {
+case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTacToeState, Int] {
 
   import TicTacToeState.{stateSize, diagonal1, diagonal2}
 
@@ -53,7 +41,7 @@ case class TicTacToeState private[tictactoe](state: Int) {
     * @param index
     * @return
     */
-  def move(index: Int): MoveResult = {
+  def move(index: Int): MoveResult[TicTacToeState] = {
     require(index >= 0 && index < stateSize, s"Cannot place token on $index")
     require(tokenAt(index) == noToken, s"Cannot place token on $index in $this")
 
@@ -132,7 +120,7 @@ case class TicTacToeState private[tictactoe](state: Int) {
     *
     * @return
     */
-  lazy val pureState: PureState = {
+  lazy val pureState: Int = {
     if (currentPlayer == p0) {
       state
     }

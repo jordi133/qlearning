@@ -46,5 +46,4 @@ class TrainedPlayer[S, G <: GameState[G, S]](matrix: QMatrix[S], seed: Int) exte
 
   override def getNextMove(state: G): Action = TrainedPlayer.getNextBestMove(state, matrix, rnd)
 
-
 }

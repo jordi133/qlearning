@@ -3,7 +3,7 @@ package object qlearning {
 
   type Action = Int
 
-  type MoveResult[T] = Either[(PlayerId, T), T]
+  type MoveResult[G] = Either[(PlayerId, G), G]
 
   type QMatrix[S] = Map[S, Map[Action, Double]]
 

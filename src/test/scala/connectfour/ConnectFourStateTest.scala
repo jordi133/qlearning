@@ -4,6 +4,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 import ConnectFourState._
 import qlearning._
+import MoveResultImplicit.ImplicitState
 
 class ConnectFourStateTest extends WordSpec with Matchers {
 
@@ -54,19 +55,19 @@ class ConnectFourStateTest extends WordSpec with Matchers {
     "return the same state if it is already pure 1" in {
       val state = ConnectFourState.newState(p0)
         .move(0)
-        .flatMap(_.move(3))
-        .flatMap(_.move(3))
-        .flatMap(_.move(5))
+        .move(3)
+        .move(3)
+        .move(5)
 
       state.right.get.pureState shouldBe state.right.get.longState
     }
     "return the same state if it is already pure 2" in {
       val state = ConnectFourState.newState(p1)
         .move(0)
-        .flatMap(_.move(3))
-        .flatMap(_.move(5))
-        .flatMap(_.move(3))
-        .flatMap(_.move(1))
+        .move(3)
+        .move(5)
+        .move(3)
+        .move(1)
 
       state.right.get.pureState shouldBe state.right.get.longState
     }
@@ -87,44 +88,44 @@ class ConnectFourStateTest extends WordSpec with Matchers {
     "return false when not winning" in {
       val state = ConnectFourState.newState(p1)
         .move(0)
-        .flatMap(_.move(3))
-        .flatMap(_.move(5))
-        .flatMap(_.move(3))
-        .flatMap(_.move(1))
+        .move(3)
+        .move(5)
+        .move(3)
+        .move(1)
 
       state.right.get.isWonByMove(0) shouldBe false
     }
     "return true when winning 0" in {
       val state = ConnectFourState.newState(p1)
         .move(0)
-        .flatMap(_.move(1))
-        .flatMap(_.move(0))
-        .flatMap(_.move(1))
-        .flatMap(_.move(0))
-        .flatMap(_.move(1))
+        .move(1)
+        .move(0)
+        .move(1)
+        .move(0)
+        .move(1)
 
       state.right.get.isWonByMove(0) shouldBe true
     }
     "return true when winning 1" in {
       val state = ConnectFourState.newState(p1)
         .move(0)
-        .flatMap(_.move(4))
-        .flatMap(_.move(1))
-        .flatMap(_.move(4))
-        .flatMap(_.move(2))
-        .flatMap(_.move(4))
+        .move(4)
+        .move(1)
+        .move(4)
+        .move(2)
+        .move(4)
 
       state.right.get.isWonByMove(3) shouldBe true
     }
     "return true when winning 2" in {
       val state = ConnectFourState.newState(p1)
         .move(0) // - - - - - - -
-        .flatMap(_.move(1)) // - - - - - - -
-        .flatMap(_.move(1)) // - - - - - - -
-        .flatMap(_.move(2)) // - X X X - - -
-        .flatMap(_.move(2)) // X O O O - - -
-        .flatMap(_.move(3))
-        .flatMap(_.move(3))
+        .move(1) // - - - - - - -
+        .move(1) // - - - - - - -
+        .move(2) // - X X X - - -
+        .move(2) // X O O O - - -
+        .move(3)
+        .move(3)
 
       state.right.get.isWonByMove(4) shouldBe true
     }
@@ -144,4 +145,5 @@ class ConnectFourStateTest extends WordSpec with Matchers {
       state.right.get.isWonByMove(3) shouldBe true
     }
   }
+
 }

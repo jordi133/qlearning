@@ -14,7 +14,6 @@ object Main extends App {
     println(s"Training opponent with seed $seed")
     val learner = new QLearner[Long, ConnectFourState](learningRate = 0.2d, discountFactor = 0.5d, episodes = 100000, seed = rnd.nextInt())
     val qMatrix = learner.qLearning(startingPlayer => ConnectFourState.newState(startingPlayer))
-//    val opponent = new TrainedConnectFourPlayer(qMatrix, rnd.nextInt())
     val opponent = new TrainedPlayer[Long, ConnectFourState](qMatrix, rnd.nextInt())
     println(s"Finished training (took ${System.currentTimeMillis() - t0} ms)")
 

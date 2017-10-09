@@ -2,14 +2,17 @@ package tictactoe
 
 import org.scalatest.{Matchers, WordSpec}
 
+import qlearning._
+import MoveResultImplicit.ImplicitState
+
 /**
   * Created by Jordi on 1-10-2017.
   */
 class QLearnerTest extends WordSpec with Matchers {
 
   "qLearning" should {
-    val learner = new QLearner(learningRate = 0.2d, discountFactor = 0.5d, episodes = 10000, seed = 0)
-    val result = learner.qLearning
+    val learner = new QLearner[Int, TicTacToeState](learningRate = 0.2d, discountFactor = 0.5d, episodes = 10000, seed = 0)
+    val result = learner.qLearning(startingPlayer => TicTacToeState.newState(startingPlayer))
     "give highest Q Value to the move preventing the opponent from winning" in {
       val state = TicTacToeState.newState(p0)
         .move(0) // O - O

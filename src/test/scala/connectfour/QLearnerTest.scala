@@ -1,12 +1,12 @@
 package connectfour
 
-import qlearning._
-
+import connectfour.MoveResultImplicit.ImplicitState
 import org.scalatest.{Matchers, WordSpec}
+import qlearning._
 
 class QLearnerTest extends WordSpec with Matchers {
 
-  "qLearning" should {
+  "qLearning" ignore  {
     val learner = new QLearner[Long, ConnectFourState](learningRate = 0.5d, discountFactor = 0.8d, episodes = 1000000, seed = 0)
     val t0 = System.currentTimeMillis()
     val result = learner.qLearning(startingPlayer => ConnectFourState.newState(startingPlayer))
@@ -17,11 +17,11 @@ class QLearnerTest extends WordSpec with Matchers {
 
       val state = ConnectFourState.newState(p0)
         .move(0) // - - - - - - -
-        .flatMap(_.move(1)) // - - - - - - -
-        .flatMap(_.move(2)) // - - - - - - -
-        .flatMap(_.move(1)) // - X - - - - -
-        .flatMap(_.move(0)) // O X - - - - -
-        .flatMap(_.move(1)) // O X O - - - -
+        .move(1) // - - - - - - -
+        .move(2) // - - - - - - -
+        .move(1) // - X - - - - -
+        .move(0) // O X - - - - -
+        .move(1) // O X O - - - -
         .right.get
 
       val indexToPreventWin = 1
@@ -40,11 +40,11 @@ class QLearnerTest extends WordSpec with Matchers {
 
       val state = ConnectFourState.newState(p0)
         .move(0) // - - - - - - -
-        .flatMap(_.move(1)) // - - - - - - -
-        .flatMap(_.move(0)) // - - - - - - -
-        .flatMap(_.move(1)) // O X - - - - -
-        .flatMap(_.move(0)) // O X - - - - -
-        .flatMap(_.move(1)) // O X - - - - -
+        .move(1) // - - - - - - -
+        .move(0) // - - - - - - -
+        .move(1) // O X - - - - -
+        .move(0) // O X - - - - -
+        .move(1) // O X - - - - -
         .right.get
       val winningMove = 0
       val otherIndices = 1 until ConnectFourState.cols

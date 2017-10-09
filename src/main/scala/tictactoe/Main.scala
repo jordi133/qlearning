@@ -1,5 +1,7 @@
 package tictactoe
 
+import qlearning._
+
 import scala.io.StdIn
 import scala.util.{Failure, Random, Success, Try}
 
@@ -10,9 +12,9 @@ object Main extends App {
     val t0 = System.currentTimeMillis()
     val rnd = new Random(seed)
     println(s"Training opponent with seed $seed")
-    val learner = new QLearner(learningRate = 0.2d, discountFactor = 0.5d, episodes = 10000, seed = rnd.nextInt())
-    val qMatrix = learner.qLearning
-    val opponent = new TrainedPlayer(qMatrix, rnd.nextInt())
+    val learner = new qlearning.QLearner[Int, TicTacToeState](learningRate = 0.2d, discountFactor = 0.5d, episodes = 10000, seed = rnd.nextInt())
+    val qMatrix = learner.qLearning(startingPlayer => TicTacToeState.newState(startingPlayer))
+    val opponent = new TrainedPlayer[Int, TicTacToeState](qMatrix, rnd.nextInt())
     println(s"Finished training (took ${System.currentTimeMillis() - t0} ms)")
 
     var stop = false
@@ -46,7 +48,7 @@ object Main extends App {
     }
   }
 
-  def playGame(mr: MoveResult, opponent: Player): PlayerId = mr match {
+  def playGame(mr: MoveResult[TicTacToeState], opponent: TrainedPlayer[Int, TicTacToeState]): PlayerId = mr match {
     case Left((winner, _)) =>
       winner
     case Right(state) if state.currentPlayer == p0 =>
