@@ -7,7 +7,7 @@ import qlearning._
 class QLearnerTest extends WordSpec with Matchers {
 
   "qLearning" ignore  {
-    val learner = new QLearner[Long, ConnectFourState](ConnectFourState.newState, learningRate = 0.5d, discountFactor = 0.8d, episodes = 1000000, seed = 0)
+    val learner = new QLearner[Long, Int, ConnectFourState](ConnectFourState.newState, learningRate = 0.5d, discountFactor = 0.8d, episodes = 1000000, seed = 0)
     val t0 = System.currentTimeMillis()
     val result = learner.qLearning()
     val dt = System.currentTimeMillis() - t0

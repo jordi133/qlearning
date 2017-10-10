@@ -1,10 +1,10 @@
 package qlearning
 
-trait GameState[G, S] {
+trait GameState[G, PureState, Action] {
 
   def currentPlayer: PlayerId
 
-  def pureState: S
+  def pureState: PureState
 
   def move(action: Action): MoveResult[G]
 

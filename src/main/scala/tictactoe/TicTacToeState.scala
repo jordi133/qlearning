@@ -1,6 +1,7 @@
 package tictactoe
 
 import qlearning._
+import tictactoe.TicTacToeState.{ActionType, StateRepr}
 
 /**
   * Created by Jordi on 30-9-2017.
@@ -12,6 +13,9 @@ object TicTacToeState {
   val currentPlayerBit: Int = 2 * stateSize
   val diagonal1 = Seq(0, 4, 8)
   val diagonal2 = Seq(2, 4, 6)
+
+  type StateRepr = Int
+  type ActionType = Int
 
   def newState: Int => TicTacToeState = { startingPlayer =>
     TicTacToeState(emptyState + (startingPlayer << currentPlayerBit))
@@ -26,7 +30,7 @@ object TicTacToeState {
   *
   *              Extending AnyVal seems slightly faster (for now)
   */
-case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTacToeState, Int] {
+case class TicTacToeState private[tictactoe](state: StateRepr) extends GameState[TicTacToeState, StateRepr, ActionType] {
 
   import TicTacToeState.{currentPlayerBit, stateSize, diagonal1, diagonal2}
 
@@ -36,7 +40,7 @@ case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTa
 
   lazy val currentPlayer: PlayerId = (state >> currentPlayerBit) & 1
 
-  private def updateTokenAt(index: Int): Int = state & ~(1 << (stateSize + index)) | (playerTokens(currentPlayer) << (stateSize + index)) | (1 << index)
+  private def updateTokenAt(index: Int): StateRepr = state & ~(1 << (stateSize + index)) | (playerTokens(currentPlayer) << (stateSize + index)) | (1 << index)
 
   /**
     * Returns either Left(winning player) or Right(resulting board after move)
@@ -44,7 +48,7 @@ case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTa
     * @param index
     * @return
     */
-  def move(index: Int): MoveResult[TicTacToeState] = {
+  def move(index: ActionType): MoveResult[TicTacToeState] = {
     require(index >= 0 && index < stateSize, s"Cannot place token on $index")
     require(tokenAt(index) == noToken, s"Cannot place token on $index in $this")
 
@@ -63,7 +67,7 @@ case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTa
   /**
     * Performs a move without checking whether game will be won or whether a token is overrwritten
     */
-  def forceMove(index: Int): TicTacToeState = TicTacToeState(updateTokenAt(index) ^ (1 << currentPlayerBit))
+  def forceMove(index: ActionType): TicTacToeState = TicTacToeState(updateTokenAt(index) ^ (1 << currentPlayerBit))
 
   /**
     * Function calculates whether the game can be won by the current player
@@ -71,7 +75,7 @@ case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTa
     * @param index
     * @return
     */
-  def isWonByMove(index: Int): Boolean = {
+  def isWonByMove(index: ActionType): Boolean = {
     // First gather all indices of the row, column and possibly diagonals that can form three-in-a-line (index to move on is filtered out)
     val row = index / 3 // 0, 1 or 2
     val rowIndices = Some(Seq(row * 3, row * 3 + 1, row * 3 + 2).filter(_ != index))
@@ -102,7 +106,7 @@ case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTa
     }
   }
 
-  lazy val getPossibleMoves: IndexedSeq[Int] = (0 until stateSize).filter(tokenAt(_) == noToken)
+  lazy val getPossibleMoves: IndexedSeq[ActionType] = (0 until stateSize).filter(tokenAt(_) == noToken)
 
   override def toString: String = {
     StringBuilder.newBuilder
@@ -123,7 +127,7 @@ case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTa
     *
     * @return
     */
-  lazy val pureState: Int = {
+  lazy val pureState: StateRepr = {
     if (currentPlayer == p0) {
       state
     }

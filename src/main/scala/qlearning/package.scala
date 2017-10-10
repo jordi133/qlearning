@@ -1,11 +1,9 @@
 package object qlearning {
   type PlayerId = Int
 
-  type Action = Int
-
   type MoveResult[G] = Either[(PlayerId, G), G]
 
-  type QMatrix[S] = Map[S, Map[Action, Double]]
+  type QMatrix[State, Action] = Map[State, Map[Action, Double]]
 
   type Token = Int
 

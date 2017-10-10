@@ -1,5 +1,6 @@
 package connectfour
 
+import connectfour.ConnectFourState.{ActionType, StateRepr}
 import qlearning._
 
 /**
@@ -17,6 +18,9 @@ object ConnectFourState {
   val currentPlayerBit = 63
   val colCountOffsets = Array(42, 45, 48, 51, 54, 57, 60)
 
+  type StateRepr = Long
+  type ActionType = Int
+
   private val diagonals1 = Seq((-3, -3), (-2, -2), (-1, -1), (1, 1), (2, 2), (3, 3)).sliding(3).toVector
   private val diagonals2 = Seq((-3, 3), (-2, 2), (-1, 1), (1, -1), (2, -2), (3, -3)).sliding(3).toVector
   val diagonals: Vector[Seq[(Int, Int)]] = diagonals1 ++ diagonals2
@@ -27,7 +31,7 @@ object ConnectFourState {
   }
 }
 
-case class ConnectFourState private[connectfour](longState: Long) extends GameState[ConnectFourState, Long] {
+case class ConnectFourState private[connectfour](longState: Long) extends GameState[ConnectFourState, StateRepr, ActionType] {
 
   import ConnectFourState._
 
@@ -60,7 +64,7 @@ case class ConnectFourState private[connectfour](longState: Long) extends GameSt
     }
   }
 
-  def isWonByMove(col: Action): Boolean = {
+  def isWonByMove(col: ActionType): Boolean = {
     val row = tokensInCol(col)
     val leftmostRelevantCol = Math.max(col - 3, 0)
     val rightMostRelevantCol = Math.min(col + 3, cols - 1)

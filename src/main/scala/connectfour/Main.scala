@@ -12,9 +12,9 @@ object Main extends App {
     val t0 = System.currentTimeMillis()
     val rnd = new Random(seed)
     println(s"Training opponent with seed $seed")
-    val learner = new QLearner[Long, ConnectFourState](ConnectFourState.newState, learningRate = 0.2d, discountFactor = 0.5d, episodes = 100000, seed = rnd.nextInt())
-    val qMatrix = learner.qLearning()
-    val opponent = new TrainedPlayer[Long, ConnectFourState](qMatrix, rnd.nextInt())
+    val learner = new QLearner[Long, Int, ConnectFourState](ConnectFourState.newState, learningRate = 0.2d, discountFactor = 0.5d, episodes = 100000, seed = rnd.nextInt())
+    val qMatrix: QMatrix[Long, Int] = learner.qLearning()
+    val opponent = new TrainedPlayer[Long, Int, ConnectFourState](qMatrix, rnd.nextInt())
     println(s"Finished training (took ${System.currentTimeMillis() - t0} ms)")
 
     var stop = false
@@ -48,7 +48,7 @@ object Main extends App {
     }
   }
 
-  def playGame(mr: MoveResult[ConnectFourState], opponent: TrainedPlayer[_, ConnectFourState]): PlayerId = mr match {
+  def playGame(mr: MoveResult[ConnectFourState], opponent: TrainedPlayer[_,Int, ConnectFourState]): PlayerId = mr match {
     case Left((winner, _)) =>
       winner
     case Right(state) if state.currentPlayer == p0 =>

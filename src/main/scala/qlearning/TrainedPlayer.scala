@@ -6,7 +6,7 @@ object TrainedPlayer {
   /**
     * Selects next best move, or a random move if this state has not been trained yet
     */
-  def getNextBestMove[S, G <: GameState[G, S]](state: G, qMatrix: QMatrix[S], rnd: Random): Action = {
+  def getNextBestMove[S, A, G <: GameState[G, S, A]](state: G, qMatrix: QMatrix[S, A], rnd: Random): A = {
     if (qMatrix(state.pureState).nonEmpty) {
       qMatrix(state.pureState).maxBy(_._2)._1
     } else {
@@ -18,8 +18,8 @@ object TrainedPlayer {
   /**
     * Picks a next move randomly based on boltzman distribution (highest Q value has highest chance_
     */
-  def nextMoveForTraining[S, G <: GameState[G, S]](state: G, qMatrix: QMatrix[S], rnd: Random): Action = {
-    def pickFromCumulativeChances(valuesWithChange: Seq[(Int, Double)], roll: Double): Action = valuesWithChange match {
+  def nextMoveForTraining[S, A, G <: GameState[G, S, A]](state: G, qMatrix: QMatrix[S, A], rnd: Random): A = {
+    def pickFromCumulativeChances(valuesWithChange: Seq[(A, Double)], roll: Double): A = valuesWithChange match {
       case (v, c) +: _ if roll < c => v
       case (_, c) +: vs => pickFromCumulativeChances(vs, roll - c)
       case _ => throw new IllegalArgumentException
@@ -40,10 +40,10 @@ object TrainedPlayer {
   }
 }
 
-class TrainedPlayer[S, G <: GameState[G, S]](matrix: QMatrix[S], seed: Int) extends Player[G] {
+class TrainedPlayer[S,A, G <: GameState[G, S, A]](matrix: QMatrix[S, A], seed: Int) extends Player[A, G] {
 
   val rnd = new Random(seed)
 
-  override def getNextMove(state: G): Action = TrainedPlayer.getNextBestMove(state, matrix, rnd)
+  override def getNextMove(state: G): A = TrainedPlayer.getNextBestMove(state, matrix, rnd)
 
 }
