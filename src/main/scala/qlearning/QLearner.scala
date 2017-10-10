@@ -3,7 +3,7 @@ package qlearning
 import scala.util.Random
 
 
-class QLearner[S, G <: GameState[G, S]](learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episodes: Int = 100000, seed: Int = 0) {
+class QLearner[S, G <: GameState[G, S]](createGameFromStartingPlayer: Int => G, learningRate: Double = 0.2d, discountFactor: Double = 0.5d, episodes: Int = 100000, seed: Int = 0) {
 
     val defaultQ: Double = 0
     val winReward: Double = 1
@@ -27,16 +27,16 @@ class QLearner[S, G <: GameState[G, S]](learningRate: Double = 0.2d, discountFac
     /**
       * Main training algorithm
       */
-    def qLearning(createNewGame: Int => G): QMatrix[S] = {
+    def qLearning(): QMatrix[S] = {
       for (_ <- 0 until episodes) {
-        runEpisode(createNewGame)
+        runEpisode()
       }
       qMatrix
     }
 
-    def runEpisode(createNewGame: Int => G): Unit = {
+    def runEpisode(): Unit = {
       val startingPlayer = rnd.nextInt(2)
-      playGame(Right(createNewGame(startingPlayer)))
+      playGame(Right(createGameFromStartingPlayer(startingPlayer)))
     }
 
     def playGame(mr: MoveResult[G], previousStatesAndActions: Seq[(G, Int)] = Seq.empty): Unit = mr match {

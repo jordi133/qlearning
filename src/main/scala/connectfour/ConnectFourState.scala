@@ -21,7 +21,7 @@ object ConnectFourState {
   private val diagonals2 = Seq((-3, 3), (-2, 2), (-1, 1), (1, -1), (2, -2), (3, -3)).sliding(3).toVector
   val diagonals: Vector[Seq[(Int, Int)]] = diagonals1 ++ diagonals2
 
-  def newState(startingPlayer: PlayerId): ConnectFourState = {
+  def newState: Int => ConnectFourState = { startingPlayer =>
     val state = startingPlayer.toLong << currentPlayerBit
     ConnectFourState(state)
   }

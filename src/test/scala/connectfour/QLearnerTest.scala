@@ -7,9 +7,9 @@ import qlearning._
 class QLearnerTest extends WordSpec with Matchers {
 
   "qLearning" ignore  {
-    val learner = new QLearner[Long, ConnectFourState](learningRate = 0.5d, discountFactor = 0.8d, episodes = 1000000, seed = 0)
+    val learner = new QLearner[Long, ConnectFourState](ConnectFourState.newState, learningRate = 0.5d, discountFactor = 0.8d, episodes = 1000000, seed = 0)
     val t0 = System.currentTimeMillis()
-    val result = learner.qLearning(startingPlayer => ConnectFourState.newState(startingPlayer))
+    val result = learner.qLearning()
     val dt = System.currentTimeMillis() - t0
 
     "give highest Q Value to the move preventing the opponent from winning" in {

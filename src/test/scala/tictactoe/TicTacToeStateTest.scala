@@ -20,17 +20,15 @@ class TicTacToeStateTest extends WordSpec with Matchers {
       }
     }
     "work for filled board p0" in {
-      val tokens = Vector.fill(TicTacToeState.stateSize)(p0TokenChar)
-      val v = stateAsInt(tokens, 0)
-      val state = TicTacToeState(v)
+      val stateAsInt = 511
+      val state = TicTacToeState(stateAsInt)
       (0 until TicTacToeState.stateSize).foreach {
         state.tokenAt(_) shouldBe p0Token
       }
     }
     "work for filled board p1" in {
-      val tokens = Vector.fill(TicTacToeState.stateSize)(p1TokenChar)
-      val v = stateAsInt(tokens, 0)
-      val state = TicTacToeState(v)
+      val stateAsInt = 262143
+      val state = TicTacToeState(stateAsInt)
       (0 until TicTacToeState.stateSize).foreach {
         state.tokenAt(_) shouldBe p1Token
       }
@@ -79,55 +77,47 @@ class TicTacToeStateTest extends WordSpec with Matchers {
 
   "isWonByMove" should {
     "return true if won by next move winning with row" in {
-      val v = stateAsInt(Vector(p0TokenChar, p0TokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar))
-      val state = TicTacToeState(v)
+      val state = TicTacToeState.newState(0).move(0).move(3).move(1).move(4)
 
       state.isWonByMove(2) shouldBe true
     }
-    "return false if won not by next move winning with row" in {
-      val v = stateAsInt(Vector(p0TokenChar, p0TokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar), currentPlayer = 1)
-      val state = TicTacToeState(v)
+    "return false if not won by next move winning with row" in {
+      val state = TicTacToeState.newState(0).move(0).move(3).move(1).move(4)
 
-      state.isWonByMove(2) shouldBe false
+      state.isWonByMove(6) shouldBe false
     }
     "return true if won by next move winning with column" in {
-      val v = stateAsInt(Vector(p0TokenChar, noTokenChar, noTokenChar, p0TokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar))
-      val state = TicTacToeState(v)
+      val state = TicTacToeState.newState(0).move(0).move(1).move(3).move(2)
 
       state.isWonByMove(6) shouldBe true
     }
     "return false if won not by next move winning with column" in {
-      val v = stateAsInt(Vector(p0TokenChar, noTokenChar, noTokenChar, p0TokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar), currentPlayer = 1)
-      val state = TicTacToeState(v)
+      val state = TicTacToeState.newState(0).move(0).move(1).move(3).move(2)
 
-      state.isWonByMove(6) shouldBe false
+      state.isWonByMove(7) shouldBe false
     }
     "return true if won by next move winning with diagonal" in {
-      val v = stateAsInt(Vector(p0TokenChar, noTokenChar, noTokenChar, noTokenChar, p0TokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar))
-      val state = TicTacToeState(v)
+      val state = TicTacToeState.newState(0).move(0).move(1).move(4).move(2)
 
       state.isWonByMove(8) shouldBe true
     }
     "return false if won not by next move winning with diagonal" in {
-      val v = stateAsInt(Vector(p0TokenChar, noTokenChar, noTokenChar, noTokenChar, p0TokenChar, noTokenChar, noTokenChar, noTokenChar, noTokenChar), currentPlayer = 1)
-      val state = TicTacToeState(v)
+      val state = TicTacToeState.newState(0).move(0).move(1).move(4).move(2)
 
-      state.isWonByMove(8) shouldBe false
+      state.isWonByMove(6) shouldBe false
     }
   }
 
   "possibleMoves" should {
     "return empty seq on full board" in {
-      val v = stateAsInt(Vector(p0TokenChar, p0TokenChar, p0TokenChar, p0TokenChar, p0TokenChar, p0TokenChar, p0TokenChar, p0TokenChar, p0TokenChar))
-      val state = TicTacToeState(v)
+      val state = (0 until 9).foldLeft(TicTacToeState.newState(0))(_.forceMove(_))
 
       state.getPossibleMoves shouldBe empty
     }
     "return open indices in gamestate" in {
-      val v = stateAsInt(Vector(p0TokenChar, noTokenChar, noTokenChar, p0TokenChar, noTokenChar, p0TokenChar, p0TokenChar, p0TokenChar, noTokenChar))
-      val state = TicTacToeState(v)
+      val state = TicTacToeState.newState(0).move(0).move(1).move(4).move(2)
 
-      state.getPossibleMoves shouldBe Seq(1, 2, 4, 8)
+      state.getPossibleMoves shouldBe Seq(3, 5, 6, 7, 8)
     }
   }
 

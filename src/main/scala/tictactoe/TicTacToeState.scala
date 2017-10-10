@@ -9,31 +9,34 @@ import qlearning._
 object TicTacToeState {
   val stateSize = 9
   val emptyState = 0
+  val currentPlayerBit: Int = 2 * stateSize
   val diagonal1 = Seq(0, 4, 8)
   val diagonal2 = Seq(2, 4, 6)
 
-  def newState(startingPlayer: PlayerId) = TicTacToeState(emptyState + (startingPlayer << (2 * stateSize)))
+  def newState: Int => TicTacToeState = { startingPlayer =>
+    TicTacToeState(emptyState + (startingPlayer << currentPlayerBit))
+  }
 
 }
 
 /**
-  * @param state The state of the game. Counting from the rightmost bit, the first two bits correspond
-  *              to the topleft field, containing 00 for '-', 01 for 'O' and 10 for 'X'. The next two
-  *              correspond to the middle field of the top row, and so on. The 18th bit form the right
-  *              contains the next player
+  * @param state The state of the game. Counting from the rightmost bit, the first nine bits represent
+  *              whether a field is filled, and the second nine bits represent the token that is placed
+  *              if it is filled. The next bit represents the next player.
   *
   *              Extending AnyVal seems slightly faster (for now)
   */
 case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTacToeState, Int] {
 
-  import TicTacToeState.{stateSize, diagonal1, diagonal2}
+  import TicTacToeState.{currentPlayerBit, stateSize, diagonal1, diagonal2}
 
   def tokenAt(i: Int): Token =
-    (state >> (2 * i)) & 3
+    if ((state >> i & 1) == 0) noToken
+    else (state >> (stateSize + i)) & 1
 
-  lazy val currentPlayer: PlayerId = (state >> (2 * stateSize)) & 1
+  lazy val currentPlayer: PlayerId = (state >> currentPlayerBit) & 1
 
-  def updateTokenAt(index: Int): Int = state + (playerTokens(currentPlayer) << (2 * index))
+  private def updateTokenAt(index: Int): Int = state & ~(1 << (stateSize + index)) | (playerTokens(currentPlayer) << (stateSize + index)) | (1 << index)
 
   /**
     * Returns either Left(winning player) or Right(resulting board after move)
@@ -51,7 +54,7 @@ case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTa
       Left(pDraw, forceMove(index))
     } else {
       // Update token and flip bit representing next player
-      val newIntState = updateTokenAt(index) ^ (1 << (2 * stateSize))
+      val newIntState = updateTokenAt(index) ^ (1 << currentPlayerBit)
 
       Right(TicTacToeState(newIntState))
     }
@@ -60,7 +63,7 @@ case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTa
   /**
     * Performs a move without checking whether game will be won or whether a token is overrwritten
     */
-  def forceMove(index: Int): TicTacToeState = TicTacToeState(updateTokenAt(index) ^ (1 << (2 * stateSize)))
+  def forceMove(index: Int): TicTacToeState = TicTacToeState(updateTokenAt(index) ^ (1 << currentPlayerBit))
 
   /**
     * Function calculates whether the game can be won by the current player
@@ -129,8 +132,8 @@ case class TicTacToeState private[tictactoe](state: Int) extends GameState[TicTa
       for (i <- 0 until stateSize) {
         tokenAt(i) match {
           case `noToken` =>
-          case `p0Token` => result += (p1Token << (2 * i))
-          case `p1Token` => result += (p0Token << (2 * i))
+          case `p0Token` => result += (p1Token << (stateSize + i)) | (1 << i)
+          case `p1Token` => result += (p0Token << (stateSize + i)) | (1 << i)
         }
       }
       result

@@ -11,8 +11,8 @@ import MoveResultImplicit.ImplicitState
 class QLearnerTest extends WordSpec with Matchers {
 
   "qLearning" should {
-    val learner = new QLearner[Int, TicTacToeState](learningRate = 0.2d, discountFactor = 0.5d, episodes = 10000, seed = 0)
-    val result = learner.qLearning(startingPlayer => TicTacToeState.newState(startingPlayer))
+    val learner = new QLearner[Int, TicTacToeState](TicTacToeState.newState, learningRate = 0.2d, discountFactor = 0.5d, episodes = 10000, seed = 0)
+    val result = learner.qLearning()
     "give highest Q Value to the move preventing the opponent from winning" in {
       val state = TicTacToeState.newState(p0)
         .move(0) // O - O
