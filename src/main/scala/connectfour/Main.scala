@@ -9,13 +9,25 @@ object Main extends App {
 
   override def main(args: Array[String]): Unit = {
     val seed = Random.nextInt()
-    val t0 = System.currentTimeMillis()
     val rnd = new Random(seed)
-    println(s"Training opponent with seed $seed")
-    val learner = new QLearner[Long, Int, ConnectFourState](ConnectFourState.newState, learningRate = 0.2d, discountFactor = 0.5d, episodes = 100000, seed = rnd.nextInt())
-    val qMatrix: QMatrix[Long, Int] = learner.qLearning()
-    val opponent = new TrainedPlayer[Long, Int, ConnectFourState](qMatrix, rnd.nextInt())
-    println(s"Finished training (took ${System.currentTimeMillis() - t0} ms)")
+
+    val filename = "1000000-eps0.5-lr0.8-df.cfql"
+
+    val loadedOpponent =
+//      if (args.length == 0) {
+        loadOpponentFromFile(filename)
+//      } else {
+//        Failure(new IllegalArgumentException(s"Could not read player from file ${args.head}"))
+//      }
+
+    val opponent = loadedOpponent match {
+      case Success(player) =>
+        player
+      case Failure(cause) =>
+        println(cause.getMessage)
+        println(s"Training opponent with seed $seed")
+        trainOpponent(rnd)
+    }
 
     var stop = false
     while (!stop) {
@@ -34,6 +46,23 @@ object Main extends App {
     }
   }
 
+//  def askNextAction
+
+  def loadOpponentFromFile(filename: String): Try[TrainedPlayer[Long, Int, ConnectFourState]] = {
+    val matrix = Learner.readMatrixFromFile(filename).withFilter(_.nonEmpty)
+    val player = matrix.map(m => new TrainedPlayer[Long, Int, ConnectFourState](m, 0))
+    player
+  }
+
+  def trainOpponent(rnd: Random): TrainedPlayer[Long, Int, ConnectFourState] = {
+    val t0 = System.currentTimeMillis()
+    val learner = new QLearner[Long, Int, ConnectFourState](ConnectFourState.newState, learningRate = 0.2d, discountFactor = 0.8d, episodes = 10000, seed = rnd.nextInt())
+    val qMatrix: QMatrix[Long, Int] = learner.qLearning()
+    val opponent = new TrainedPlayer[Long, Int, ConnectFourState](qMatrix, rnd.nextInt())
+    println(s"Finished training (took ${System.currentTimeMillis() - t0} ms)")
+    opponent
+  }
+
   def readIndex(possibleMoves: Seq[Int]): Int = {
     println(s"Enter any index to place next token (possibilities: ${possibleMoves.mkString(", ")})")
     Try(StdIn.readLine().toInt) match {
@@ -48,7 +77,7 @@ object Main extends App {
     }
   }
 
-  def playGame(mr: MoveResult[ConnectFourState], opponent: TrainedPlayer[_,Int, ConnectFourState]): PlayerId = mr match {
+  def playGame(mr: MoveResult[ConnectFourState], opponent: TrainedPlayer[_, Int, ConnectFourState]): PlayerId = mr match {
     case Left((winner, _)) =>
       winner
     case Right(state) if state.currentPlayer == p0 =>

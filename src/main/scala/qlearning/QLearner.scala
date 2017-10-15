@@ -29,8 +29,13 @@ class QLearner[S, A, G <: GameState[G, S, A]](createGameFromStartingPlayer: Int 
     * Main training algorithm
     */
   def qLearning(): QMatrix[S, A] = {
-    for (_ <- 0 until episodes) {
+    var t0 = System.currentTimeMillis()
+    for (i <- 0 until episodes) {
       runEpisode()
+      if (i % (episodes / 100) == 0){
+        println(s"Progress: ${i / (episodes / 100)}% (${System.currentTimeMillis()-t0} ms for the last ${episodes / 100} episodes)")
+        t0 = System.currentTimeMillis()
+      }
     }
     qMatrix
   }

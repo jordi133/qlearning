@@ -7,7 +7,7 @@ object TrainedPlayer {
     * Selects next best move, or a random move if this state has not been trained yet
     */
   def getNextBestMove[S, A, G <: GameState[G, S, A]](state: G, qMatrix: QMatrix[S, A], rnd: Random): A = {
-    if (qMatrix(state.pureState).nonEmpty) {
+    if (qMatrix.contains(state.pureState) && qMatrix(state.pureState).nonEmpty) {
       qMatrix(state.pureState).maxBy(_._2)._1
     } else {
       val nextPossibleMoves = state.getPossibleMoves
