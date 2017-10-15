@@ -2,6 +2,9 @@
 *.class
 *.log
 
+# trained players for ConnectFour
+*.cfql
+
 # sbt specific
 .cache
 .history
