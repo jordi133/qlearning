@@ -3,14 +3,14 @@ package connectfour
 import java.io._
 import java.nio.ByteBuffer
 
-import qlearning.{QLearner, QMatrix}
+import qlearning.QMatrix
 
 import scala.util.Try
 
 /**
   * Trains to play ConnectFour and then saves the resulting Q Matrix to a file
   */
-object Learner {
+object FileHandler {
 
   def writeMatrixToFile(matrix: QMatrix[Long, Int], filename: String): Try[Unit] = Try {
     val out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(filename)))

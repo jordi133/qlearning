@@ -49,7 +49,7 @@ object Main extends App {
 //  def askNextAction
 
   def loadOpponentFromFile(filename: String): Try[TrainedPlayer[Long, Int, ConnectFourState]] = {
-    val matrix = Learner.readMatrixFromFile(filename).withFilter(_.nonEmpty)
+    val matrix = FileHandler.readMatrixFromFile(filename).withFilter(_.nonEmpty)
     val player = matrix.map(m => new TrainedPlayer[Long, Int, ConnectFourState](m, 0))
     player
   }
